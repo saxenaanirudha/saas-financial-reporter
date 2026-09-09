@@ -1,0 +1,41 @@
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Testing and coverage caches
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.swp
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# Output artifacts (ignore generated runtime files, but preserve folder structure via .gitkeep)
+charts/*.png
+charts/*.jpg
+charts/*.svg
+reports/*.pdf
+reports/*.html
+reports/*.csv
+models/*.joblib
+models/*.json
+!.gitkeep
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml

@@ -1,0 +1,18 @@
+# Short Repository Description (<= 160 characters):
+Automated Python SaaS financial reporting engine: MRR/ARR, CAC, cash-flow forecasting, automated PDF reports, and customer churn ML risk scoring.
+
+# Suggested GitHub Topics / Tags:
+python
+saas
+financial-reporting
+data-analytics
+machine-learning
+churn-prediction
+cash-flow-forecasting
+pdf-generation
+pandas
+scikit-learn
+reportlab
+portfolio-project
+data-pipeline
+unit-economics
