@@ -1,8 +1,53 @@
 # SaaS Financial Reporter 📊
 
-[![CI — SaaS Financial Reporter](https://github.com/<YOUR_GITHUB_USERNAME>/saas-financial-reporter/actions/workflows/ci.yml/badge.svg)](https://github.com/<YOUR_GITHUB_USERNAME>/saas-financial-reporter/actions/workflows/ci.yml)
+[![CI — SaaS Financial Reporter](https://github.com/saxenaanirudha/saas-financial-reporter/actions/workflows/ci.yml/badge.svg)](https://github.com/saxenaanirudha/saas-financial-reporter/actions/workflows/ci.yml)
 
-An AI-assisted, modular Python analytics and reporting engine that automates recurring revenue metrics, customer acquisition efficiency, historical cash-flow analysis, linear trend forecasting, executive PDF report compilation, and customer churn risk classification.
+An AI-assisted SaaS financial reporting and customer analytics project featuring KPI analysis, cash-flow forecasting, automated reporting, an interactive Streamlit dashboard, and ML-based churn risk prediction.
+
+> **Note on Datasets**: All financial and customer records used in this project are synthetic and illustrative, designed to simulate realistic SaaS business dynamics without using proprietary data.
+
+---
+
+## ⚡ Quick Start
+
+```powershell
+# 1. Run the automated analytics pipeline (computes KPIs, forecasts, PDF report, ML model)
+python main.py
+
+# 2. Launch the interactive browser dashboard
+streamlit run app.py
+```
+
+---
+
+## 🖥️ Dashboard Preview
+
+The project includes an interactive Streamlit web dashboard providing a non-technical presentation layer for executives, investors, and team members to explore financial performance, cash trajectories, and customer risk scoring.
+
+![SaaS Financial Reporter Executive Dashboard](docs/images/saas-executive-overview.png)
+
+### Cash Flow & Forecast
+![Cash Flow Forecast Dashboard](docs/images/saas-cashflow.png)
+
+### Customer Churn Intelligence
+![Customer Churn Intelligence Dashboard](docs/images/saas-customer-churn-intelligence.png)
+
+---
+
+## 🌟 Key Highlights
+
+- **MRR and ARR Analytics**: Computes Monthly Recurring Revenue (MRR) and Annualized Recurring Revenue (ARR) run-rates.
+- **MRR Growth Analysis**: Measures Month-over-Month (MoM) revenue growth rates and net revenue expansions.
+- **Customer Acquisition Cost (CAC)**: Tracks marketing spend efficiency per newly acquired customer.
+- **Customer Churn & Retention Analysis**: Reconstructs customer counts chronologically to evaluate monthly subscriber churn and retention rates.
+- **Historical Operating Cash-Flow Analysis**: Tracks monthly cash inflows against categorized operating expenses and rolls forward cash balances *(cash flow tracking, not GAAP accounting profit)*.
+- **6-Month Trend-Based Cash-Flow Forecasting**: Projects 6-month forward cash trajectories using component-by-component OLS linear regression *(trend-based projection, not guaranteed financial predictions)*.
+- **Automated Management/Investor PDF Reporting**: Generates a multi-page, publication-grade executive PDF report with dynamic KPI tables and 10 embedded high-resolution charts via ReportLab.
+- **Streamlit Browser Dashboard**: Interactive presentation interface (`streamlit run app.py`) for non-technical stakeholders to explore financial KPIs, cash-flow forecasts, churn intelligence, reports, and project information.
+- **Customer-Level Churn Prediction using Logistic Regression**: End-to-end Scikit-Learn classification pipeline trained on separate customer behavioral data *(illustrative synthetic dataset; not claimed as production performance)*.
+- **Low / Medium / High Churn-Risk Classification**: Categorizes customer churn probabilities into actionable risk tiers for targeted retention intervention.
+- **Automated Test Suite**: 180 automated unit, integration, and mathematical regression tests verifying formulas, data integrity, and error handling.
+- **Modular Pipeline Architecture**: Clean, decoupled architecture with automated directory initialization and artifact validation.
 
 ---
 
@@ -10,24 +55,25 @@ An AI-assisted, modular Python analytics and reporting engine that automates rec
 1. [Overview](#-overview)
 2. [Business Problem](#-business-problem)
 3. [Key Features](#-key-features)
-4. [Architecture](#-architecture)
-5. [Project Structure](#-project-structure)
-6. [Financial Dataset](#-financial-dataset)
-7. [Customer Churn Dataset](#-customer-churn-dataset)
-8. [Financial KPI Logic & Formulas](#-financial-kpi-logic--formulas)
-9. [Historical Cash Flow Analysis](#-historical-cash-flow-analysis)
-10. [Six-Month Cash Flow Forecasting](#-six-month-cash-flow-forecasting)
-11. [Customer Churn Machine Learning](#-customer-churn-machine-learning)
-12. [Generated Outputs & Artifacts](#-generated-outputs--artifacts)
-13. [Installation & Setup](#-installation--setup)
-14. [Running the Project](#-running-the-project)
-15. [Running Tests](#-running-tests)
-16. [Example Workflow](#-example-workflow)
-17. [Assumptions & Limitations](#-assumptions--limitations)
-18. [AI-Assisted Development Approach](#-ai-assisted-development-approach)
-19. [Skills Demonstrated](#-skills-demonstrated)
-20. [Future Improvements](#-future-improvements)
-21. [Disclaimer](#-disclaimer)
+4. [Interactive Streamlit Dashboard](#-interactive-streamlit-dashboard)
+5. [Architecture](#-architecture)
+6. [Project Structure](#-project-structure)
+7. [Financial Dataset](#-financial-dataset)
+8. [Customer Churn Dataset](#-customer-churn-dataset)
+9. [Financial KPI Logic & Formulas](#-financial-kpi-logic--formulas)
+10. [Historical Cash Flow Analysis](#-historical-cash-flow-analysis)
+11. [Six-Month Cash Flow Forecasting](#-six-month-cash-flow-forecasting)
+12. [Customer Churn Machine Learning](#-customer-churn-machine-learning)
+13. [Generated Outputs & Artifacts](#-generated-outputs--artifacts)
+14. [Installation & Setup](#-installation--setup)
+15. [Running the Project](#-running-the-project)
+16. [Running Tests](#-running-tests)
+17. [Example Workflow](#-example-workflow)
+18. [Assumptions & Limitations](#-assumptions--limitations)
+19. [AI-Assisted Development Approach](#-ai-assisted-development-approach)
+20. [Skills Demonstrated](#-skills-demonstrated)
+21. [Future Improvements](#-future-improvements)
+22. [Disclaimer](#-disclaimer)
 
 ---
 
@@ -39,7 +85,8 @@ The **SaaS Financial Reporter** automates the periodic financial analysis and re
 - **Operating Cash Flow**: Inflow vs. multi-category outflow tracking, monthly net flow, and cumulative balance roll-forward.
 - **Trend-Based Forecasting**: 6-month statistical forecasting of revenue and individual expense components using linear regression.
 - **Automated Investor Reporting**: Generation of presentation-grade, multi-page PDF executive summaries with embedded high-resolution charts.
-- **Predictive Churn Risk Modeling**: A separate, customer-level Machine Learning classification pipeline (Logistic Regression) that estimates churn probabilities and classifies accounts into actionable risk tiers.
+- **Interactive Web Interface**: A Streamlit browser application designed for non-technical stakeholders to interactively inspect financial performance and ML churn scoring.
+- **Predictive Churn Risk Modeling**: A customer-level Machine Learning classification pipeline (Logistic Regression) that estimates churn probabilities and classifies accounts into actionable risk tiers.
 
 ---
 
@@ -51,7 +98,7 @@ In early-stage and growing SaaS companies, monthly financial and customer report
 - **Limited Forward Visibility**: Cash runways and expense trends are often projected using crude manual estimates.
 - **Delayed Retention Intervention**: High-risk accounts are identified only after cancellations have already occurred.
 
-This project demonstrates how a modular Python data pipeline can automate data validation, financial calculations, forecasting, chart rendering, PDF publication, and predictive churn risk scoring in a unified, reproducible run.
+This project demonstrates how a modular Python data pipeline can automate data validation, financial calculations, forecasting, chart rendering, PDF publication, interactive exploration, and predictive churn risk scoring in a unified, reproducible run.
 
 > *Note: This project demonstrates reporting workflow automation and is not a substitute for audited accounting or professional financial advisory services.*
 
@@ -80,17 +127,40 @@ This project demonstrates how a modular Python data pipeline can automate data v
 ### 5. Automated Management & Investor PDF Report
 - **Multi-Page Executive Report**: Generates a publication-grade PDF using ReportLab with dynamic timestamps, KPI snapshot grids, financial statements, and 10 embedded high-resolution charts.
 
-### 6. Customer-Level Churn Machine Learning Pipeline
+### 6. Interactive Presentation Dashboard (Streamlit)
+- **Executive KPI Dashboard**: Live interactive cards, metric deltas, and responsive financial charts.
+- **Cash Flow & Forecast Explorer**: Visual breakdown of historical cash flows, forward runway projections, and monthly expense structures.
+- **Customer Churn Intelligence**: Real-time account risk filtering, feature importance explanations, and interactive risk tier distributions.
+- **Reports & Artifact Viewer**: In-browser PDF report download, dataset inspectors, and system architecture summaries.
+
+### 7. Customer-Level Churn Machine Learning Pipeline
 - **Separate Behavioral Dataset**: Evaluates 500 customer records without contaminating aggregated financial data.
 - **Scikit-Learn Pipeline**: Integrates `StandardScaler` (numerical), `OneHotEncoder` (categorical), and `LogisticRegression`.
 - **Anti-Leakage Safeguards**: Preprocessing is fit strictly on training splits (`X_train`); identifiers and post-cancellation fields are excluded.
 - **Actionable Risk Tiers**: Categorizes predicted probabilities into **Low** ($<0.30$), **Medium** ($0.30–0.60$), and **High** ($\ge 0.60$) risk segments.
 - **Feature Importance**: Extracts learned coefficients and odds ratios to identify top churn risk drivers.
 
-### 7. Reliability & Execution Orchestration
+### 8. Reliability & Execution Orchestration
 - **Pipeline Coordinator (`src/pipeline.py`)**: Drives end-to-end execution with decoupled stages.
 - **Severity-Aware Error Handling**: Critical errors halt execution safely; non-critical failures log warnings and produce `PARTIAL_SUCCESS`.
 - **Automatic Directory & Artifact Validation**: Auto-creates `charts/`, `reports/`, `models/` and verifies on-disk output integrity.
+
+---
+
+## 🖥️ Interactive Streamlit Dashboard
+
+To provide a non-technical, client-friendly presentation layer, the repository includes a Streamlit browser dashboard:
+
+```powershell
+streamlit run app.py
+```
+
+### Dashboard Capabilities:
+- **Executive Overview**: High-level financial KPIs (MRR, ARR, CAC, churn rate, cash balance) with interactive month-over-month trend charts.
+- **Cash Flow & Forecast**: Interactive breakdown of historical operating expenses, net cash flow, and 6-month linear forward projections.
+- **Customer Churn Intelligence**: Exploration of customer churn risk tiers (Low, Medium, High), search and filtering across individual account profiles, and feature importance drivers.
+- **Reports & Data Viewer**: In-browser inspection of raw datasets, generated metrics, and one-click download of the generated executive PDF report.
+- **Architecture & Workflow**: Visual documentation of data flow, modeling assumptions, and engineering architecture.
 
 ---
 
@@ -127,9 +197,10 @@ Monthly Financial Dataset (CSV)                 Customer-Level Churn Dataset (CS
    [ PDF Investor Report ]                             [ Churn Risk CSV & Charts ]
    (ReportLab Master File)                             (customer_churn_risk.csv)
              │                                                  │
+             ├──────────────────────────────────────────────────┤
              ▼                                                  ▼
-   [ Console Dashboard ]                               [ Serialized Model Artifact ]
-   (Consolidated Summary)                              (churn_model.joblib)
+    [ Console Dashboard ]                              [ Streamlit Dashboard ]
+   (CLI Summary Pipeline)                             (Browser Presentation Layer)
              │                                                  │
              └──────────────────────┬───────────────────────────┘
                                     │
@@ -154,6 +225,12 @@ saas-financial-reporter/
 │   ├── customer_churn_data.csv        # Synthetic customer-level churn data (500 records)
 │   └── generate_churn_data.py         # Deterministic customer churn data generator
 │
+├── docs/
+│   └── images/                        # Documentation and preview screenshots
+│       ├── saas-executive-overview.png
+│       ├── saas-cashflow.png
+│       └── saas-customer-churn-intelligence.png
+│
 ├── src/                               # Core application modules
 │   ├── __init__.py
 │   ├── config.py                      # Centralized path definitions and constants
@@ -171,30 +248,30 @@ saas-financial-reporter/
 │   ├── reporting_dashboard.py         # Consolidated console reporting dashboard
 │   └── churn_model.py                 # Logistic regression churn ML model & risk scoring
 │
-├── models/
+├── models/                            # Model output artifacts
 │   ├── .gitkeep                       # Folder tracking
-│   ├── churn_model.joblib             # Serialized trained scikit-learn pipeline
-│   └── churn_model_metrics.json       # Serialized test evaluation metrics
+│   ├── churn_model.joblib             # Serialized trained scikit-learn pipeline (generated at runtime; not committed)
+│   └── churn_model_metrics.json       # Serialized test evaluation metrics (generated at runtime; not committed)
 │
-├── charts/
+├── charts/                            # Visual chart outputs
 │   ├── .gitkeep                       # Folder tracking
-│   ├── mrr_trend.png                  # MRR monthly trajectory
-│   ├── arr_trend.png                  # ARR annualized trajectory
-│   ├── cac_trend.png                  # Customer Acquisition Cost trajectory
-│   ├── churn_retention_trend.png      # Churn & retention rate comparison
-│   ├── customer_base_growth.png       # Active subscriber base growth
-│   ├── mrr_growth_rate.png            # MoM MRR growth rate percentage
-│   ├── net_cash_flow_trend.png        # Monthly net cash flow bars
-│   ├── cash_balance_trend.png         # Closing cash balance trajectory
-│   ├── cash_flow_forecast.png         # Historical vs 6-month net cash flow forecast
-│   ├── cash_balance_forecast.png      # Historical vs 6-month cash balance forecast
-│   ├── churn_confusion_matrix.png     # Churn ML confusion matrix heatmap
-│   └── churn_roc_curve.png            # Churn ML ROC-AUC curve
+│   ├── mrr_trend.png                  # MRR monthly trajectory (generated at runtime; not committed)
+│   ├── arr_trend.png                  # ARR annualized trajectory (generated at runtime; not committed)
+│   ├── cac_trend.png                  # Customer Acquisition Cost trajectory (generated at runtime; not committed)
+│   ├── churn_retention_trend.png      # Churn & retention rate comparison (generated at runtime; not committed)
+│   ├── customer_base_growth.png       # Active subscriber base growth (generated at runtime; not committed)
+│   ├── mrr_growth_rate.png            # MoM MRR growth rate percentage (generated at runtime; not committed)
+│   ├── net_cash_flow_trend.png        # Monthly net cash flow bars (generated at runtime; not committed)
+│   ├── cash_balance_trend.png         # Closing cash balance trajectory (generated at runtime; not committed)
+│   ├── cash_flow_forecast.png         # Historical vs 6-month net cash flow forecast (generated at runtime; not committed)
+│   ├── cash_balance_forecast.png      # Historical vs 6-month cash balance forecast (generated at runtime; not committed)
+│   ├── churn_confusion_matrix.png     # Churn ML confusion matrix heatmap (generated at runtime; not committed)
+│   └── churn_roc_curve.png            # Churn ML ROC-AUC curve (generated at runtime; not committed)
 │
-├── reports/
+├── reports/                           # Executive reports
 │   ├── .gitkeep                       # Folder tracking
-│   ├── saas_financial_report.pdf      # Master management/investor PDF report
-│   └── customer_churn_risk.csv        # Scored customer accounts with risk tiers
+│   ├── saas_financial_report.pdf      # Master management/investor PDF report (generated at runtime; not committed)
+│   └── customer_churn_risk.csv        # Scored customer accounts with risk tiers (generated at runtime; not committed)
 │
 ├── tests/                             # Unit & Integration test suite (180 passing tests)
 │   ├── __init__.py
@@ -212,14 +289,15 @@ saas-financial-reporter/
 │   ├── test_pipeline.py
 │   └── test_end_to_end_regression.py  # End-to-end mathematical regression tests
 │
-├── main.py                            # Lightweight application entry point
-├── requirements.txt                   # Verified minimal dependencies
-├── .gitignore                         # Comprehensive git ignore configuration
-├── PROJECT_SUMMARY.md                 # Interview preparation & quick reference
+├── app.py                             # Interactive Streamlit browser dashboard
+├── main.py                            # Automated pipeline CLI entry point
+├── requirements.txt                   # Minimal project dependencies
+├── .gitignore                         # Git ignore configuration (excludes runtime artifacts)
+├── PROJECT_SUMMARY.md                 # Project architecture & quick reference
 ├── GITHUB_DESCRIPTION.txt             # Repository description & topic tags
-├── RESUME_PROJECT_ENTRY.md            # Resume & LinkedIn portfolio snippets
-├── INTERVIEW_QA.md                    # 20 common interview questions & answers
-└── README.md                          # Technical architecture documentation
+├── RESUME_PROJECT_ENTRY.md            # Resume & portfolio snippets
+├── INTERVIEW_QA.md                    # 20 common technical & domain interview Q&As
+└── README.md                          # Comprehensive technical documentation
 ```
 
 ---
@@ -309,11 +387,13 @@ The cash flow module models operational liquidity under a transparent simplified
    - $\text{Closing Balance}_t = \text{Opening Balance}_t + \text{Net Cash Flow}_t$
    - $\text{Opening Balance}_{t+1} = \text{Closing Balance}_t$
 
+> **Important Distinction**: Operating cash flow represents liquidity movement through the business and is distinct from GAAP accounting profit (which would require accounting for accruals, depreciation, and amortization).
+
 ---
 
 ## 🔮 Six-Month Cash Flow Forecasting
 
-To estimate future cash burn and runway without opaque black-box assumptions, the forecaster fits independent Ordinary Least Squares (OLS) linear trend models on historical monthly series ($t = 1 \dots N$):
+To estimate future cash burn and runway without opaque assumptions, the forecaster fits independent Ordinary Least Squares (OLS) linear trend models on historical monthly series ($t = 1 \dots N$):
 
 1. **Component Trend Models**:
    - $\widehat{\text{Inflow}}(t) = \beta_0^{\text{in}} + \beta_1^{\text{in}} t$
@@ -329,9 +409,7 @@ To estimate future cash burn and runway without opaque black-box assumptions, th
 4. **Projected Balance Roll-Forward**:
    The first forecast month opens with the latest historical closing cash balance and rolls forward across the 6 projected months.
 
-### Forecasting Assumptions & Limitations
-- Assumes historical linear trends continue into the forward window.
-- Does not account for seasonality, macro shocks, sudden pricing adjustments, or equity financing rounds.
+> **Forecasting Nature**: These projections represent linear trend extrapolations based on historical trajectory for planning scenarios, not guaranteed future financial outcomes.
 
 ---
 
@@ -360,16 +438,16 @@ Predicted probabilities $P(\text{Churn} = 1)$ are mapped to portfolio action tie
 
 ## 📁 Generated Outputs & Artifacts
 
-When the pipeline executes, the following verified artifacts are produced:
+When the pipeline executes, the following verified artifacts are produced (runtime artifacts are ignored by Git via `.gitignore`):
 
-| Output Artifact | Location | Description |
-| :--- | :--- | :--- |
-| **PDF Investor Report** | `reports/saas_financial_report.pdf` | Comprehensive multi-page management & investor summary |
-| **Customer Risk Scoring CSV** | `reports/customer_churn_risk.csv` | All 500 accounts scored and ranked by churn probability |
-| **Serialized Churn Model** | `models/churn_model.joblib` | Trained scikit-learn pipeline binary |
-| **Model Evaluation Metrics** | `models/churn_model_metrics.json` | Test set metrics in structured JSON format |
-| **Financial KPI Charts (10)** | `charts/*.png` | High-resolution trend plots (MRR, ARR, CAC, Cash Flow, Forecast) |
-| **ML Evaluation Charts (2)** | `charts/churn_*.png` | Confusion Matrix heatmap & ROC-AUC curve |
+| Output Artifact | Location | Commit Status | Description |
+| :--- | :--- | :--- | :--- |
+| **PDF Investor Report** | `reports/saas_financial_report.pdf` | *(generated at runtime; not committed)* | Comprehensive multi-page management & investor summary |
+| **Customer Risk Scoring CSV** | `reports/customer_churn_risk.csv` | *(generated at runtime; not committed)* | All 500 accounts scored and ranked by churn probability |
+| **Serialized Churn Model** | `models/churn_model.joblib` | *(generated at runtime; not committed)* | Trained scikit-learn pipeline binary |
+| **Model Evaluation Metrics** | `models/churn_model_metrics.json` | *(generated at runtime; not committed)* | Test set metrics in structured JSON format |
+| **Financial KPI Charts (10)** | `charts/*.png` | *(generated at runtime; not committed)* | High-resolution trend plots (MRR, ARR, CAC, Cash Flow, Forecast) |
+| **ML Evaluation Charts (2)** | `charts/churn_*.png` | *(generated at runtime; not committed)* | Confusion Matrix heatmap & ROC-AUC curve |
 
 ---
 
@@ -381,7 +459,7 @@ When the pipeline executes, the following verified artifacts are produced:
 
 ### 2. Clone the Repository
 ```powershell
-git clone https://github.com/<YOUR_GITHUB_USERNAME>/saas-financial-reporter.git
+git clone https://github.com/saxenaanirudha/saas-financial-reporter.git
 cd saas-financial-reporter
 ```
 
@@ -407,13 +485,14 @@ pip install -r requirements.txt
 
 ## 🏃 Running the Project
 
+### 1. Run the Automated Analytics & ML Pipeline
 To execute the complete end-to-end reporting pipeline and ML workflow:
 
 ```powershell
 python main.py
 ```
 
-### What Happens During Execution:
+#### What Happens During Pipeline Execution:
 1. Output directories (`charts/`, `reports/`, `models/`) are initialized automatically.
 2. Monthly financial data (`data/saas_financial_data.csv`) is validated and loaded.
 3. Revenue, CAC, and Churn/Retention analytics are computed.
@@ -423,6 +502,15 @@ python main.py
 7. Customer churn dataset (`data/customer_churn_data.csv`) is processed and trained via Logistic Regression.
 8. Customer risk report (`reports/customer_churn_risk.csv`) and model binaries are persisted.
 9. Final artifact validation verifies all 16 generated files on disk.
+
+### 2. Launch the Interactive Presentation Dashboard
+To launch the client-ready Streamlit web application:
+
+```powershell
+streamlit run app.py
+```
+
+The dashboard will open automatically in your default browser (typically at `http://localhost:8501`), providing a visual, interactive interface to explore all financial KPIs, runway forecasts, customer risk segments, and generated PDF reports.
 
 ---
 
@@ -447,14 +535,15 @@ pytest -q
 3. **Inspect Console Dashboard**: Review executive revenue summary, MoM KPI movements, and overall status.
 4. **Open PDF Report**: Open `reports/saas_financial_report.pdf` for executive or investor review.
 5. **Review At-Risk Accounts**: Open `reports/customer_churn_risk.csv` to review high-probability churn accounts for proactive intervention.
+6. **Explore in Browser**: Run `streamlit run app.py` to present insights interactively.
 
 ---
 
 ## ⚠️ Assumptions & Limitations
 
 - **Synthetic Datasets**: Both the financial dataset (6 months) and customer churn dataset (500 records) are illustrative synthetic data created for portfolio demonstration.
-- **Simplified Cash Flow Ledger**: Cash inflow is modeled directly from MRR without tracking deferred revenue, accounts receivable aging, or billing timing differences.
-- **Linear Trend Forecasting**: OLS trend forecasting assumes historical growth patterns continue; it does not model macroeconomic cycles, seasonal dips, or sudden market events.
+- **Simplified Cash Flow Ledger**: Cash inflow is modeled directly from MRR without tracking deferred revenue, accounts receivable aging, or billing timing differences. Operating cash flow is not GAAP accounting profit.
+- **Linear Trend Forecasting**: OLS trend forecasting assumes historical growth patterns continue; it represents planning scenarios and does not guarantee future financial outcomes or model macroeconomic shocks.
 - **Customer Base Reconstruction**: Aggregate historical subscriber counts are reconstructed chronologically assuming Month 1 begins with 0 customers.
 - **Model Portfolio Scope**: The churn classification model demonstrates a clean ML workflow and is not calibrated for live automated production decisioning without real product telemetry.
 
@@ -462,9 +551,9 @@ pytest -q
 
 ## 🤖 AI-Assisted Development Approach
 
-This project was developed using an **AI-assisted software engineering workflow**. Business requirements, financial formulas, statistical methods, pipeline architecture, and test scenarios were designed and iteratively refined, with AI coding tools (including ChatGPT, Claude Code, and Antigravity) utilized to assist in implementation, test creation, and debugging.
+This project was developed using an **AI-assisted software engineering workflow**. AI tools (such as Claude, ChatGPT, and Antigravity) supported implementation, boilerplate generation, and debugging, while project direction was focused on core business requirements, financial logic formulation, statistical methodology, rigorous test coverage, and end-to-end workflow integration.
 
-The primary objective of this project was to master the full analytics lifecycle—from raw data ingestion and financial mathematics to machine learning integration, test-driven validation, and clean software packaging—ensuring every formula, edge case, and architectural decision is transparent, interview-defensible, and thoroughly tested.
+The primary objective of this project was to construct a transparent, production-style analytics and reporting lifecycle—from raw data validation and financial mathematics to machine learning integration, test-driven quality assurance, and interactive presentation—ensuring every formula, edge case, and architectural decision is transparent, interview-defensible, and thoroughly validated.
 
 ---
 
@@ -475,6 +564,7 @@ The primary objective of this project was to master the full analytics lifecycle
 - **Machine Learning & Predictive Modeling**: Scikit-Learn pipelines, `ColumnTransformer`, `StandardScaler`, `OneHotEncoder`, `LogisticRegression`, and risk stratification.
 - **Data Leakage Awareness**: Training/test split discipline, transformer fitting isolation, and identifier exclusion.
 - **Automated Document & Chart Generation**: Multi-page PDF generation via ReportLab and publication-grade Matplotlib visualizations.
+- **Interactive Web Development**: Streamlit dashboard presentation layer with caching and modular data connectivity.
 - **Robust Software Engineering**: Decoupled architecture, domain exceptions, input DataFrame immutability, automated directory preparation, and artifact validation.
 - **Test-Driven Quality Assurance**: 180 comprehensive unit and regression tests using `pytest`.
 - **CI/CD Automation**: GitHub Actions multi-version Python test matrix (Python 3.9–3.12) and artifact upload workflows.
@@ -485,7 +575,6 @@ The primary objective of this project was to master the full analytics lifecycle
 
 - **Extended Historical Data**: Incorporate multi-year financial history to support seasonal ARIMA / Holt-Winters forecasting.
 - **Cohort Retention Heatmaps**: Build triangle cohort retention matrices tracking subscriber longevity over time.
-- **Interactive Web Interface**: Integrate a Streamlit or FastAPI dashboard for real-time scenario simulation and parameter tuning.
 - **Threshold Calibration**: Implement cost-sensitive threshold optimization based on Customer Lifetime Value (LTV) vs. retention outreach cost.
 - **Database Integration**: Connect ingestion pipelines to PostgreSQL or cloud data warehouses (BigQuery/Snowflake).
 
