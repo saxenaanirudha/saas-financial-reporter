@@ -97,6 +97,7 @@ The project includes an interactive Streamlit web dashboard providing a non-tech
 21. [Skills Demonstrated](#-skills-demonstrated)
 22. [Future Improvements](#-future-improvements)
 23. [Disclaimer](#-disclaimer)
+24. [License](#license)
 
 ---
 
@@ -322,6 +323,7 @@ saas-financial-reporter/
 ├── main.py                            # Automated pipeline CLI entry point
 ├── requirements.txt                   # Project dependencies with PEP 508 Python version markers
 ├── .gitignore                         # Git ignore configuration (excludes runtime artifacts)
+├── LICENSE                            # MIT open-source license
 ├── BARN_DOOR_QA_REPORT.md             # Formal Barn Door Protocol security & QA audit report
 ├── PROJECT_SUMMARY.md                 # Project architecture & quick reference
 ├── GITHUB_DESCRIPTION.txt             # Repository description & topic tags
@@ -700,3 +702,9 @@ The primary objective of this project was to construct a transparent, production
 ## ⚖️ Disclaimer
 
 This project uses synthetic portfolio data and simplified financial and machine learning assumptions. It is designed solely for educational, portfolio, and demonstration purposes. It does not constitute investment advice, audited financial accounting, or production-ready decisioning software.
+
+---
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
