@@ -45,6 +45,7 @@ jobs:
       - name: Run unit tests
         env:
           MPLBACKEND: Agg
+          PYTHONPATH: .
         run: pytest -v --tb=short
 
   # ── Job 2: End-to-End Pipeline Validation (Python 3.12) ───────────────────
@@ -80,6 +81,7 @@ jobs:
       - name: Run full reporting pipeline
         env:
           MPLBACKEND: Agg
+          PYTHONPATH: .
         run: python main.py
 
       - name: Upload generated charts

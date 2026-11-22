@@ -35,7 +35,7 @@ from pathlib import Path
 import tempfile
 import threading
 import functools
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, Tuple, Union
 import xml.sax.saxutils as saxutils
 
 import pandas as pd
@@ -419,7 +419,7 @@ def atomic_publish_model_and_provenance(
     provenance_path: Optional[Union[str, Path]] = None,
     secret: Optional[Union[str, bytes]] = None,
     require_secret: bool = False,
-) -> tuple[Path, Path]:
+) -> Tuple[Path, Path]:
     """
     Atomically publishes a serialized scikit-learn/joblib model artifact and its
     cryptographic HMAC provenance manifest together under a shared lock.
@@ -444,7 +444,7 @@ def atomic_publish_model_and_provenance(
 
     Returns
     -------
-    tuple[Path, Path]
+    Tuple[Path, Path]
         Paths to published model and provenance manifest.
     """
     import joblib

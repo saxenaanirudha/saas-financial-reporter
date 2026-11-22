@@ -8,6 +8,8 @@ Security regression tests covering OWASP vulnerabilities for SaaS Financial Repo
 - SEC-05: Denial of Service / Resource Exhaustion via Oversized Datasets (CWE-400)
 """
 
+from __future__ import annotations
+
 import os
 from pathlib import Path
 import tempfile

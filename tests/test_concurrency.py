@@ -6,6 +6,8 @@ Concurrency & multi-user tests for SaaS Financial Reporter:
 - CONC-02: Atomic file write and concurrent output file isolation
 """
 
+from __future__ import annotations
+
 import concurrent.futures
 from pathlib import Path
 import threading
