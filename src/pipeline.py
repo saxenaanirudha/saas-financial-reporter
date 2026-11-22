@@ -25,6 +25,7 @@ from src.config import (
     CHURN_DATA_PATH,
     CHURN_METRICS_PATH,
     CHURN_MODEL_PATH,
+    CHURN_PROVENANCE_PATH,
     CHURN_RISK_REPORT_PATH,
     DATA_DIR,
     FINANCIAL_DATA_PATH,
@@ -44,6 +45,7 @@ from src.exceptions import (
     PipelineError,
     ReportGenerationError,
 )
+from src.security import sanitize_dataframe_for_csv, atomic_write_bytes
 
 # Core Financial Modules
 from src.data_loader import DataValidationError, load_financial_data
@@ -580,7 +582,11 @@ def run_churn_pipeline(
     try:
         scored_df = predict_churn_probabilities(pipeline, churn_df)
         reports_out.mkdir(parents=True, exist_ok=True)
-        scored_df.to_csv(risk_report_path, index=False)
+        # SEC-01 & CONC-02: Defensively sanitize against spreadsheet formula injection (CWE-1236)
+        # and atomically persist to prevent partial writes during concurrent pipelines
+        clean_risk_df = sanitize_dataframe_for_csv(scored_df)
+        csv_bytes = clean_risk_df.to_csv(index=False).encode("utf-8")
+        atomic_write_bytes(risk_report_path, csv_bytes)
 
         if verbose:
             risk_counts = scored_df["RiskLevel"].value_counts().to_dict()

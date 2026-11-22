@@ -46,7 +46,7 @@ The project includes an interactive Streamlit web dashboard providing a non-tech
 - **Streamlit Browser Dashboard**: Interactive presentation interface (`streamlit run app.py`) for non-technical stakeholders to explore financial KPIs, cash-flow forecasts, churn intelligence, reports, and project information.
 - **Customer-Level Churn Prediction using Logistic Regression**: End-to-end Scikit-Learn classification pipeline trained on separate customer behavioral data *(illustrative synthetic dataset; not claimed as production performance)*.
 - **Low / Medium / High Churn-Risk Classification**: Categorizes customer churn probabilities into actionable risk tiers for targeted retention intervention.
-- **Automated Test Suite**: 180 automated unit, integration, and mathematical regression tests verifying formulas, data integrity, and error handling.
+- **Automated Test Suite**: 203 automated unit, integration, concurrency, and security regression tests verifying formulas, data integrity, thread safety, and error handling.
 - **Modular Pipeline Architecture**: Clean, decoupled architecture with automated directory initialization and artifact validation.
 
 ---
@@ -68,12 +68,13 @@ The project includes an interactive Streamlit web dashboard providing a non-tech
 14. [Installation & Setup](#-installation--setup)
 15. [Running the Project](#-running-the-project)
 16. [Running Tests](#-running-tests)
-17. [Example Workflow](#-example-workflow)
-18. [Assumptions & Limitations](#-assumptions--limitations)
-19. [AI-Assisted Development Approach](#-ai-assisted-development-approach)
-20. [Skills Demonstrated](#-skills-demonstrated)
-21. [Future Improvements](#-future-improvements)
-22. [Disclaimer](#-disclaimer)
+17. [Security & Quality Assurance — Barn Door Protocol](#-security--quality-assurance--barn-door-protocol)
+18. [Example Workflow](#-example-workflow)
+19. [Assumptions & Limitations](#-assumptions--limitations)
+20. [AI-Assisted Development Approach](#-ai-assisted-development-approach)
+21. [Skills Demonstrated](#-skills-demonstrated)
+22. [Future Improvements](#-future-improvements)
+23. [Disclaimer](#-disclaimer)
 
 ---
 
@@ -516,15 +517,64 @@ The dashboard will open automatically in your default browser (typically at `htt
 
 ## 🧪 Running Tests
 
-The test suite contains **180 automated unit and integration tests** verifying formulas, data validation, chart rendering, PDF generation, ML leakage prevention, and full pipeline reliability:
+The test suite contains **203 automated unit, integration, and security regression tests** verifying formulas, data validation, chart rendering, PDF generation, ML leakage prevention, CSV formula injection defense, model HMAC provenance signing, thread synchronization, and full pipeline reliability:
 
 ```powershell
-# Verbose test execution
+# Verbose test execution (runs all 203 tests across 16 test modules)
 pytest -v
 
 # Quiet summary check
 pytest -q
 ```
+
+---
+
+## 🛡️ Security & Quality Assurance — Barn Door Protocol
+
+The project has undergone rigorous application security auditing and engineering hardening following the **Barn Door Protocol**, achieving a **PASS (RELEASE READY)** verdict with **203 automated tests passing cleanly** across 16 test modules. Full methodology, vulnerability analysis, and behavioral TDD verification evidence are documented in [`BARN_DOOR_QA_REPORT.md`](BARN_DOOR_QA_REPORT.md).
+
+### Key Security & Reliability Mitigations:
+
+- **Spreadsheet Formula Injection Prevention (CWE-1236 / SEC-01 & BLK-02):**
+  Defensively sanitizes string exports in `sanitize_dataframe_for_csv()`. Cells starting with formula triggers (`=`, `+`, `-`, `@`, `\t`, `\r`) — including values preceded by whitespace, spaces, tabs, or newlines (`" =cmd|..."`, `"\t+1234"`, `"\n-cmd"`) — are safely prefixed with a single quote (`'`). Already quoted cells (`'`) are preserved without double-escaping, and native numeric columns (`float`, `int`, e.g., negative cash flows `-1500.50`) remain untransformed.
+- **HMAC-SHA256 Model Provenance Verification (CWE-502 / SEC-02 & BLK-01):**
+  Serialized scikit-learn model artifacts (`churn_model.joblib`) are paired with a cryptographically signed HMAC-SHA256 provenance manifest (`churn_model_provenance.json`). Deserialization verifies file size bounds (50 MB safety cap), path containment (preventing directory traversal attacks), SHA-256 binary hash, and HMAC signature prior to unpickling.
+- **Production Key Management & Rotation (BLK-01):**
+  Hardcoded fallback signing keys are strictly rejected. In production/strict mode (`require_secret=True`, `SAAS_STRICT_SECURITY=1`, or `SAAS_ENV=production`), a missing `SAAS_MODEL_SECRET` raises `SecurityValidationError` without exposing key bytes in logs. In local development and CI workflows, an ephemeral process-isolated random secret (`os.urandom(32)`) is generated in memory, preventing signature forgery against static keys while enabling test suites to run unhindered.
+- **Thread-Safe Matplotlib Rendering (CONC-01 / BLK-03):**
+  100% of Matplotlib operations across `src/chart_generator.py`, `src/churn_model.py` (confusion matrix & ROC curve), and `app.py` (risk distribution & feature impact bar charts) are synchronized under `MATPLOTLIB_LOCK` via `@thread_safe_chart`. All `plt.close()` calls are protected within the locked context to prevent cross-session figure bleeding and state corruption during concurrent multi-user Streamlit sessions.
+- **Atomic File Persistence (CONC-02 / BLK-04):**
+  Model binaries and provenance manifests are staged via temporary files and committed using atomic `os.replace` under `ARTIFACT_PUBLISH_LOCK` (`atomic_publish_model_and_provenance`). Customer risk CSV exports and metrics JSON are written atomically via `atomic_write_bytes()`. ReportLab PDF compilation writes to temporary files before atomic commitment, eliminating torn writes or corrupted outputs during pipeline execution.
+- **ReportLab PDF XML Entity Escaping (CWE-116 / SEC-03):**
+  All dynamic data, table cells, headers, and narrative summaries injected into ReportLab PDF flowables are sanitized via `safe_xml_escape()` (`&`, `<`, `>`, `"`, `'`), preventing XML parsing crashes.
+- **Resource Exhaustion & Denial of Service Protection (CWE-400 / SEC-05):**
+  Input datasets are strictly bounded to prevent memory exhaustion (financial data capped at 10,000 rows; churn data capped at 500,000 rows).
+- **Sanitized Error Handling (CWE-209 / SEC-04):**
+  User-facing UI exception handlers log technical stack traces to server event logs while displaying clean, sanitized error banners to prevent system path disclosure.
+
+### Secure Production Secret Configuration:
+
+To enforce strict cryptographic provenance in production environments, configure `SAAS_MODEL_SECRET` via environment variables or a secret vault:
+
+```bash
+# Linux / macOS (bash / zsh)
+export SAAS_MODEL_SECRET="<your-strong-random-hex-secret-min-32-chars>"
+export SAAS_STRICT_SECURITY=1
+
+# Windows (PowerShell)
+$env:SAAS_MODEL_SECRET="<your-strong-random-hex-secret-min-32-chars>"
+$env:SAAS_STRICT_SECURITY="1"
+```
+
+> **Key Rotation**: To rotate the signing key, update `SAAS_MODEL_SECRET` in your environment, retrain the model via `python main.py`, and re-publish the newly signed provenance manifest. Never commit or log signing keys.
+
+### Verified Protections vs. Documented Limitations:
+
+| Dimension | Verified Protections | Documented Limitations |
+| :--- | :--- | :--- |
+| **Concurrency Scope** | Multi-threaded safety within a single process via `MATPLOTLIB_LOCK` and `ARTIFACT_PUBLISH_LOCK`. | Multi-process model/manifest publication uses dual `os.replace` calls. While individual file swaps are OS-atomic, mutual transactionality across separate operating system processes requires an external distributed lock. |
+| **Application Scope** | Secure internal management reporting and analytical dashboarding. | Single-tenant architecture; not designed for untrusted multi-tenant database partitioning. |
+| **Data Scope** | Tested against malicious formula injection, XML payloads, and oversized datasets. | Simplified cash-flow ledger treats MRR as immediate cash inflow without modeling accounts receivable delays. |
 
 ---
 
@@ -566,7 +616,7 @@ The primary objective of this project was to construct a transparent, production
 - **Automated Document & Chart Generation**: Multi-page PDF generation via ReportLab and publication-grade Matplotlib visualizations.
 - **Interactive Web Development**: Streamlit dashboard presentation layer with caching and modular data connectivity.
 - **Robust Software Engineering**: Decoupled architecture, domain exceptions, input DataFrame immutability, automated directory preparation, and artifact validation.
-- **Test-Driven Quality Assurance**: 180 comprehensive unit and regression tests using `pytest`.
+- **Test-Driven Quality Assurance**: 203 comprehensive unit, integration, and security regression tests using `pytest`.
 - **CI/CD Automation**: GitHub Actions multi-version Python test matrix (Python 3.9–3.12) and artifact upload workflows.
 
 ---

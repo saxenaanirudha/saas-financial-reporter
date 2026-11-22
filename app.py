@@ -79,10 +79,12 @@ from src.churn_model import (
     evaluate_churn_model,
     get_feature_coefficients,
     load_churn_data,
+    load_saved_churn_model,
     predict_churn_probabilities,
     split_churn_data,
     train_churn_model,
 )
+from src.security import MATPLOTLIB_LOCK, sanitize_dataframe_for_csv, thread_safe_chart
 
 
 # -----------------------------------------------------------------------------
@@ -153,7 +155,9 @@ def load_financial_analytics(
             "dashboard_data": dashboard_data,
         }
     except Exception as exc:
-        st.error(f"Error computing financial analytics: {exc}")
+        import logging
+        logging.getLogger("saas_financial_reporter").error("Financial analytics error", exc_info=True)
+        st.error("Error computing financial analytics. Please check server logs.")
         return None
 
 
@@ -199,9 +203,7 @@ def load_churn_intelligence(
         feature_impact_df: Optional[pd.DataFrame] = None
         if CHURN_MODEL_PATH.exists():
             try:
-                import joblib
-
-                pipeline = joblib.load(CHURN_MODEL_PATH)
+                pipeline = load_saved_churn_model(CHURN_MODEL_PATH)
                 feature_impact_df = get_feature_coefficients(pipeline)
             except Exception:
                 feature_impact_df = None
@@ -236,7 +238,9 @@ def load_churn_intelligence(
             "risk_counts": risk_counts,
         }
     except Exception as exc:
-        st.error(f"Error computing churn analytics: {exc}")
+        import logging
+        logging.getLogger("saas_financial_reporter").error("Churn analytics error", exc_info=True)
+        st.error("Error computing churn analytics. Please check server logs.")
         return None
 
 
@@ -305,6 +309,7 @@ def set_chart_style(ax: plt.Axes) -> None:
     ax.grid(axis="y", linestyle="--", alpha=0.3, color="#94A3B8")
 
 
+@thread_safe_chart
 def render_mrr_arr_trend(revenue_df: pd.DataFrame) -> plt.Figure:
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 3.8))
 
@@ -368,6 +373,7 @@ def render_mrr_arr_trend(revenue_df: pd.DataFrame) -> plt.Figure:
     return fig
 
 
+@thread_safe_chart
 def render_cac_growth_trend(
     cac_df: pd.DataFrame, revenue_df: pd.DataFrame
 ) -> plt.Figure:
@@ -430,6 +436,7 @@ def render_cac_growth_trend(
     return fig
 
 
+@thread_safe_chart
 def render_customer_churn_trend(churn_df: pd.DataFrame) -> plt.Figure:
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 3.8))
 
@@ -491,6 +498,7 @@ def render_customer_churn_trend(churn_df: pd.DataFrame) -> plt.Figure:
     return fig
 
 
+@thread_safe_chart
 def render_cash_forecast_charts(
     cash_flow_df: pd.DataFrame, forecast_df: pd.DataFrame
 ) -> Tuple[plt.Figure, plt.Figure]:
@@ -632,6 +640,69 @@ def render_cash_forecast_charts(
     plt.tight_layout()
 
     return fig1, fig2
+
+
+@thread_safe_chart
+def render_risk_distribution_chart(
+    high_count: int, med_count: int, low_count: int, total_count: int
+) -> plt.Figure:
+    """Thread-safe generator for Customer Churn Risk distribution horizontal bar chart."""
+    fig_dist, ax_dist = plt.subplots(figsize=(8, 2.4))
+    set_chart_style(ax_dist)
+    bars = ax_dist.barh(
+        ["High Risk", "Medium Risk", "Low Risk"],
+        [high_count, med_count, low_count],
+        color=["#EF4444", "#F59E0B", "#10B981"],
+        height=0.55,
+    )
+    ax_dist.set_xlabel("Number of Customers", fontsize=9)
+    for bar in bars:
+        w = bar.get_width()
+        pct_label = f"{w / total_count * 100:.1f}%" if total_count > 0 else "0.0%"
+        ax_dist.annotate(
+            f"{w} ({pct_label})",
+            (w, bar.get_y() + bar.get_height() / 2),
+            textcoords="offset points",
+            xytext=(5, 0),
+            va="center",
+            fontsize=8,
+            fontweight="bold",
+        )
+    plt.tight_layout()
+    return fig_dist
+
+
+@thread_safe_chart
+def render_feature_impact_chart(feature_df: pd.DataFrame) -> plt.Figure:
+    """Thread-safe generator for ML Feature Impact on Churn horizontal bar chart."""
+    fig_feat, ax_feat = plt.subplots(figsize=(9, 3.8))
+    set_chart_style(ax_feat)
+
+    sorted_feats = feature_df.sort_values(
+        by="Coefficient", ascending=True
+    )
+    colors = [
+        "#EF4444" if c > 0 else "#10B981"
+        for c in sorted_feats["Coefficient"]
+    ]
+
+    ax_feat.barh(
+        sorted_feats["Feature"],
+        sorted_feats["Coefficient"],
+        color=colors,
+        height=0.55,
+    )
+    ax_feat.axvline(0, color="#64748B", linewidth=0.8)
+    ax_feat.set_xlabel(
+        "Coefficient Magnitude (Log-Odds Impact)", fontsize=9
+    )
+    ax_feat.set_title(
+        "Feature Impact on Churn Probability (Red = Increases Risk, Green = Decreases Risk)",
+        fontsize=10,
+        fontweight="bold",
+    )
+    plt.tight_layout()
+    return fig_feat
 
 
 # -----------------------------------------------------------------------------
@@ -1094,29 +1165,12 @@ def run_dashboard() -> None:
             with r4:
                 st.metric("Total Scored Accounts", f"{total_count:,} accounts")
 
-            fig_dist, ax_dist = plt.subplots(figsize=(8, 2.4))
-            set_chart_style(ax_dist)
-            bars = ax_dist.barh(
-                ["High Risk", "Medium Risk", "Low Risk"],
-                [high_count, med_count, low_count],
-                color=["#EF4444", "#F59E0B", "#10B981"],
-                height=0.55,
+            fig_dist = render_risk_distribution_chart(
+                high_count, med_count, low_count, total_count
             )
-            ax_dist.set_xlabel("Number of Customers", fontsize=9)
-            for bar in bars:
-                w = bar.get_width()
-                ax_dist.annotate(
-                    f"{w} ({w / total_count * 100:.1f}%)",
-                    (w, bar.get_y() + bar.get_height() / 2),
-                    textcoords="offset points",
-                    xytext=(5, 0),
-                    va="center",
-                    fontsize=8,
-                    fontweight="bold",
-                )
-            plt.tight_layout()
             st.pyplot(fig_dist, use_container_width=True)
-            plt.close(fig_dist)
+            with MATPLOTLIB_LOCK:
+                plt.close(fig_dist)
 
             st.markdown("---")
 
@@ -1208,35 +1262,10 @@ def run_dashboard() -> None:
                     "Values indicate statistical correlation and direction of risk association (not deterministic direct causality)."
                 )
 
-                fig_feat, ax_feat = plt.subplots(figsize=(9, 3.8))
-                set_chart_style(ax_feat)
-
-                sorted_feats = feature_df.sort_values(
-                    by="Coefficient", ascending=True
-                )
-                colors = [
-                    "#EF4444" if c > 0 else "#10B981"
-                    for c in sorted_feats["Coefficient"]
-                ]
-
-                ax_feat.barh(
-                    sorted_feats["Feature"],
-                    sorted_feats["Coefficient"],
-                    color=colors,
-                    height=0.55,
-                )
-                ax_feat.axvline(0, color="#64748B", linewidth=0.8)
-                ax_feat.set_xlabel(
-                    "Coefficient Magnitude (Log-Odds Impact)", fontsize=9
-                )
-                ax_feat.set_title(
-                    "Feature Impact on Churn Probability (Red = Increases Risk, Green = Decreases Risk)",
-                    fontsize=10,
-                    fontweight="bold",
-                )
-                plt.tight_layout()
+                fig_feat = render_feature_impact_chart(feature_df)
                 st.pyplot(fig_feat, use_container_width=True)
-                plt.close(fig_feat)
+                with MATPLOTLIB_LOCK:
+                    plt.close(fig_feat)
 
                 st.dataframe(feature_df, use_container_width=True, hide_index=True)
 
@@ -1440,10 +1469,10 @@ if __name__ == "__main__":
     try:
         run_dashboard()
     except Exception as exc:
+        import logging
+        logging.getLogger("saas_financial_reporter").error("Unhandled dashboard error", exc_info=True)
         st.error(
-            f"⚠️ **An unexpected error occurred while running the dashboard:** {exc}\n\n"
-            "Please verify that all project data files and pipeline artifacts exist by running `python main.py`."
+            "⚠️ **An unexpected error occurred while running the dashboard.**\n\n"
+            "Please verify that all project data files and pipeline artifacts exist by running `python main.py`. "
+            "Internal technical details have been logged to the server event log."
         )
-        import traceback
-
-        traceback.print_exc()
