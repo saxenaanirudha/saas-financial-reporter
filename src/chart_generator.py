@@ -27,6 +27,7 @@ from src.revenue_dashboard import calculate_revenue_metrics
 from src.cac_calculator import calculate_cac_metrics
 from src.churn_retention_analyzer import calculate_churn_retention_metrics
 from src.cash_flow_analyzer import analyze_cash_flow
+from src.security import thread_safe_chart
 
 
 def _ensure_enriched_dataframe(df: pd.DataFrame) -> pd.DataFrame:
@@ -74,6 +75,7 @@ def _setup_figure(title: str, xlabel: str = "Month", ylabel: str = ""):
     return fig, ax
 
 
+@thread_safe_chart
 def generate_mrr_chart(df: pd.DataFrame, output_dir: Union[str, Path] = "charts") -> Path:
     """
     Generates and saves the Monthly Recurring Revenue (MRR) Trend chart.
@@ -102,6 +104,7 @@ def generate_mrr_chart(df: pd.DataFrame, output_dir: Union[str, Path] = "charts"
     return out_path
 
 
+@thread_safe_chart
 def generate_arr_chart(df: pd.DataFrame, output_dir: Union[str, Path] = "charts") -> Path:
     """
     Generates and saves the Annual Recurring Revenue (ARR) Trend chart.
@@ -129,6 +132,7 @@ def generate_arr_chart(df: pd.DataFrame, output_dir: Union[str, Path] = "charts"
     return out_path
 
 
+@thread_safe_chart
 def generate_cac_chart(df: pd.DataFrame, output_dir: Union[str, Path] = "charts") -> Path:
     """
     Generates and saves the Customer Acquisition Cost (CAC) Trend chart.
@@ -157,6 +161,7 @@ def generate_cac_chart(df: pd.DataFrame, output_dir: Union[str, Path] = "charts"
     return out_path
 
 
+@thread_safe_chart
 def generate_churn_retention_chart(df: pd.DataFrame, output_dir: Union[str, Path] = "charts") -> Path:
     """
     Generates and saves the Customer Churn & Retention Trend chart.
@@ -198,6 +203,7 @@ def generate_churn_retention_chart(df: pd.DataFrame, output_dir: Union[str, Path
     return out_path
 
 
+@thread_safe_chart
 def generate_customer_base_chart(df: pd.DataFrame, output_dir: Union[str, Path] = "charts") -> Path:
     """
     Generates and saves the Active Customer Base Growth chart.
@@ -225,6 +231,7 @@ def generate_customer_base_chart(df: pd.DataFrame, output_dir: Union[str, Path] 
     return out_path
 
 
+@thread_safe_chart
 def generate_mrr_growth_chart(df: pd.DataFrame, output_dir: Union[str, Path] = "charts") -> Path:
     """
     Generates and saves the Month-over-Month MRR Growth % chart.
@@ -253,6 +260,7 @@ def generate_mrr_growth_chart(df: pd.DataFrame, output_dir: Union[str, Path] = "
     return out_path
 
 
+@thread_safe_chart
 def generate_net_cash_flow_chart(df: pd.DataFrame, output_dir: Union[str, Path] = "charts") -> Path:
     """
     Generates and saves the Net Cash Flow Trend chart.
@@ -296,6 +304,7 @@ def generate_net_cash_flow_chart(df: pd.DataFrame, output_dir: Union[str, Path] 
     return out_path
 
 
+@thread_safe_chart
 def generate_cash_balance_chart(df: pd.DataFrame, output_dir: Union[str, Path] = "charts") -> Path:
     """
     Generates and saves the Cash Balance Trend chart.
@@ -334,6 +343,7 @@ def generate_cash_balance_chart(df: pd.DataFrame, output_dir: Union[str, Path] =
     return out_path
 
 
+@thread_safe_chart
 def generate_cash_flow_forecast_chart(
     hist_df: pd.DataFrame,
     forecast_df: pd.DataFrame,
@@ -407,6 +417,7 @@ def generate_cash_flow_forecast_chart(
     return out_path
 
 
+@thread_safe_chart
 def generate_cash_balance_forecast_chart(
     hist_df: pd.DataFrame,
     forecast_df: pd.DataFrame,

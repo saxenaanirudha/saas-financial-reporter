@@ -10,6 +10,7 @@ analytics and financial reporting.
 from pathlib import Path
 from typing import Union
 import pandas as pd
+from src.security import validate_dataset_size, MAX_FINANCIAL_ROWS
 
 
 class DataValidationError(Exception):
@@ -65,6 +66,9 @@ def validate_financial_data(df: pd.DataFrame) -> pd.DataFrame:
     """
     if df is None or df.empty:
         raise DataValidationError("Validation failed: The provided dataset is empty.")
+
+    # Enforce dataset size limits against resource exhaustion (SEC-05)
+    validate_dataset_size(df, max_rows=MAX_FINANCIAL_ROWS, dataset_name="Financial Dataset")
 
     # 1. Verify required columns exist
     missing_columns = [col for col in REQUIRED_COLUMNS if col not in df.columns]

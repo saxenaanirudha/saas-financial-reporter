@@ -10,8 +10,9 @@ scikit-learn>=1.3.0
 # Model persistence library
 joblib>=1.3.0
 
-# PDF Report Generation Library
-reportlab>=4.0.0
+# PDF Report Generation Library (ReportLab 5.1.0+ requires Python 3.10+)
+reportlab>=4.0.0,<5.1.0; python_version < "3.10"
+reportlab>=4.0.0; python_version >= "3.10"
 
 # Streamlit Browser Dashboard
 streamlit>=1.30.0

@@ -54,6 +54,16 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
+from src.security import (
+    generate_model_provenance,
+    verify_model_provenance,
+    validate_dataset_size,
+    MAX_CHURN_ROWS,
+    thread_safe_chart,
+    atomic_write_bytes,
+    atomic_publish_model_and_provenance,
+)
+
 # Default Feature Schema
 NUMERICAL_FEATURES: List[str] = [
     "MonthlyFee",
@@ -114,6 +124,9 @@ def load_churn_data(
     df = pd.read_csv(path)
     if df.empty:
         raise ValueError(f"Customer churn data file is empty: {path}")
+
+    # Enforce Denial of Service / Memory safety limits
+    validate_dataset_size(df, max_rows=MAX_CHURN_ROWS, dataset_name="Customer Churn Dataset")
 
     if required_cols is None:
         required_cols = FEATURE_COLS + [TARGET_COL, CUSTOMER_ID_COL]
@@ -480,9 +493,13 @@ def get_feature_coefficients(
 def save_churn_model(
     pipeline: Pipeline,
     output_path: Union[str, Path] = "models/churn_model.joblib",
+    provenance_path: Optional[Union[str, Path]] = None,
+    secret: Optional[Union[str, bytes]] = None,
+    require_secret: bool = False,
 ) -> Path:
     """
-    Serialize the trained pipeline to disk via joblib.
+    Atomically serialize the trained pipeline to disk via joblib and publish a signed
+    cryptographic HMAC provenance manifest under a shared lock.
 
     Parameters
     ----------
@@ -490,37 +507,77 @@ def save_churn_model(
         Fitted pipeline.
     output_path : str or Path
         Destination filepath.
+    provenance_path : str or Path, optional
+        Custom destination path for provenance manifest. Defaults to <stem>_provenance.json.
+    secret : str or bytes, optional
+        Secret key for HMAC signing.
+    require_secret : bool, default False
+        Whether to require SAAS_MODEL_SECRET.
 
     Returns
     -------
     Path
-        Absolute or resolved Path to saved artifact.
+        Resolved Path to saved artifact.
     """
-    path = Path(output_path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    joblib.dump(pipeline, path)
-    return path
+    model_path, _ = atomic_publish_model_and_provenance(
+        pipeline=pipeline,
+        model_path=output_path,
+        provenance_path=provenance_path,
+        secret=secret,
+        require_secret=require_secret,
+    )
+    return model_path
 
 
 def load_saved_churn_model(
     model_path: Union[str, Path] = "models/churn_model.joblib",
+    provenance_path: Optional[Union[str, Path]] = None,
+    trusted_dir: Optional[Union[str, Path]] = None,
+    verify_provenance: bool = True,
+    secret: Optional[Union[str, bytes]] = None,
+    require_secret: bool = False,
 ) -> Pipeline:
     """
-    Load a serialized pipeline from disk.
+    Safely load a serialized pipeline from disk after verifying directory boundaries,
+    file size safety caps, and cryptographic provenance signatures.
 
     Parameters
     ----------
     model_path : str or Path
         Path to joblib file.
+    provenance_path : str or Path, optional
+        Path to provenance JSON manifest.
+    trusted_dir : str or Path, optional
+        Allowed parent directory boundary.
+    verify_provenance : bool, default True
+        Whether to enforce cryptographic provenance verification.
+    secret : str or bytes, optional
+        Secret key for HMAC verification.
+    require_secret : bool, default False
+        Whether to require SAAS_MODEL_SECRET.
 
     Returns
     -------
     Pipeline
-        Loaded model pipeline.
+        Loaded and verified model pipeline.
     """
-    path = Path(model_path)
+    path = Path(model_path).resolve()
     if not path.exists():
         raise FileNotFoundError(f"Model file not found at: {path}")
+
+    if verify_provenance:
+        if provenance_path is None:
+            prov_path = path.parent / f"{path.stem}_provenance.json"
+        else:
+            prov_path = Path(provenance_path).resolve()
+        verify_model_provenance(
+            path,
+            prov_path,
+            trusted_dir=trusted_dir,
+            require_secret=require_secret,
+            custom_secret=secret,
+        )
+
     return joblib.load(path)
 
 
@@ -529,7 +586,7 @@ def save_churn_metrics(
     output_path: Union[str, Path] = "models/churn_model_metrics.json",
 ) -> Path:
     """
-    Save model evaluation metrics to a JSON file.
+    Save model evaluation metrics to a JSON file atomically.
 
     Parameters
     ----------
@@ -543,13 +600,12 @@ def save_churn_metrics(
     Path
         Path to saved JSON file.
     """
-    path = Path(output_path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(metrics, f, indent=2)
-    return path
+    path = Path(output_path).resolve()
+    json_bytes = json.dumps(metrics, indent=2).encode("utf-8")
+    return atomic_write_bytes(path, json_bytes)
 
 
+@thread_safe_chart
 def generate_confusion_matrix_chart(
     y_test: Union[pd.Series, np.ndarray, List[int]],
     y_pred: Union[pd.Series, np.ndarray, List[int]],
@@ -623,6 +679,7 @@ def generate_confusion_matrix_chart(
     return path
 
 
+@thread_safe_chart
 def generate_roc_curve_chart(
     y_test: Union[pd.Series, np.ndarray, List[int]],
     y_proba: Union[pd.Series, np.ndarray, List[float]],

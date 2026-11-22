@@ -21,7 +21,9 @@ Architecture Rules:
 """
 
 from datetime import datetime
+import os
 from pathlib import Path
+import tempfile
 from typing import Union, Optional, Dict, Any, List
 import logging
 import pandas as pd
@@ -41,6 +43,7 @@ from reportlab.platypus import (
     HRFlowable,
 )
 from reportlab.pdfgen import canvas
+from src.security import safe_xml_escape
 
 # Import project modules to reuse existing calculations
 from src.revenue_dashboard import (
@@ -260,13 +263,13 @@ def _df_to_reportlab_table(
     if align_left_cols is None:
         align_left_cols = [0]
 
-    header_row = [Paragraph(str(col), styles["TableHeader"]) for col in df.columns]
+    header_row = [Paragraph(safe_xml_escape(col), styles["TableHeader"]) for col in df.columns]
     data_rows = []
     for _, row in df.iterrows():
         row_cells = []
         for c_idx, val in enumerate(row):
             style = styles["TableCellLeft"] if c_idx in align_left_cols else styles["TableCell"]
-            row_cells.append(Paragraph(str(val), style))
+            row_cells.append(Paragraph(safe_xml_escape(val), style))
         data_rows.append(row_cells)
 
     table_data = [header_row] + data_rows
@@ -370,9 +373,17 @@ def generate_investor_report(
     # Ensure charts are generated on disk
     generate_all_charts(cash_flow_df, charts_path, forecast_df=forecast_df)
 
-    # 2. Build Document Flow
+    # 2. Build Document Flow using temporary file for atomic persistence
+    temp_fd, temp_path_str = tempfile.mkstemp(
+        dir=out_file.parent,
+        prefix=f".tmp_{out_file.stem}_",
+        suffix=out_file.suffix,
+    )
+    os.close(temp_fd)
+    temp_pdf_path = Path(temp_path_str)
+
     doc = SimpleDocTemplate(
-        str(out_file),
+        str(temp_pdf_path),
         pagesize=letter,
         leftMargin=36,
         rightMargin=36,
@@ -392,8 +403,8 @@ def generate_investor_report(
     gen_date = datetime.now().strftime("%B %d, %Y")
 
     subtitle_text = (
-        f"<b>Historical Reporting Period:</b> {first_month} — {last_month} &nbsp;|&nbsp; "
-        f"<b>Forecast Period:</b> {fc_first} — {fc_last} &nbsp;|&nbsp; "
+        f"<b>Historical Reporting Period:</b> {safe_xml_escape(first_month)} — {safe_xml_escape(last_month)} &nbsp;|&nbsp; "
+        f"<b>Forecast Period:</b> {safe_xml_escape(fc_first)} — {safe_xml_escape(fc_last)} &nbsp;|&nbsp; "
         f"<b>Generated:</b> {gen_date}"
     )
     story.append(Paragraph(subtitle_text, styles["ReportSubtitle"]))
@@ -447,8 +458,8 @@ def generate_investor_report(
     story.append(Spacer(1, 6))
 
     narrative_text = (
-        f"<b>Performance Overview:</b> {trend_summary['narrative']} "
-        f"{cash_flow_sum['interpretation']} {forecast_sum['interpretation']}"
+        f"<b>Performance Overview:</b> {safe_xml_escape(trend_summary['narrative'])} "
+        f"{safe_xml_escape(cash_flow_sum['interpretation'])} {safe_xml_escape(forecast_sum['interpretation'])}"
     )
     story.append(Paragraph(narrative_text, styles["BodyText"]))
     story.append(Spacer(1, 8))
@@ -471,7 +482,7 @@ def generate_investor_report(
     story.append(Paragraph("3. Customer Acquisition Cost (CAC) & Efficiency", styles["SectionHeading"]))
     story.append(_df_to_reportlab_table(cac_table, styles, col_widths=[80, 110, 120, 110, 120]))
     story.append(Spacer(1, 4))
-    story.append(Paragraph(f"<b>Acquisition Efficiency Status:</b> {cac_summary['interpretation']} Starting CAC of ${cac_summary['starting_cac']:.2f} moved to ${cac_summary['latest_cac']:.2f} ({cac_summary['overall_cac_change']:+.2f}% overall change).", styles["BodyText"]))
+    story.append(Paragraph(f"<b>Acquisition Efficiency Status:</b> {safe_xml_escape(cac_summary['interpretation'])} Starting CAC of ${cac_summary['starting_cac']:.2f} moved to ${cac_summary['latest_cac']:.2f} ({cac_summary['overall_cac_change']:+.2f}% overall change).", styles["BodyText"]))
     story.append(Spacer(1, 4))
 
     cac_img = _safe_add_image(charts_path / "cac_trend.png", width=5.8 * inch, height=2.6 * inch)
@@ -482,7 +493,7 @@ def generate_investor_report(
     story.append(Paragraph("4. Customer Base Roll-Forward, Churn & Retention", styles["SectionHeading"]))
     story.append(_df_to_reportlab_table(churn_table, styles, col_widths=[65, 65, 55, 60, 65, 75, 75, 80]))
     story.append(Spacer(1, 4))
-    story.append(Paragraph(f"<b>Retention Dynamics:</b> {churn_summary['interpretation']} Customer base expanded from {df['NewCustomers'].iloc[0] - df['ChurnedCustomers'].iloc[0]} to {churn_summary['ending_customers']} active subscribers across {churn_summary['total_new_customers']} total additions and {churn_summary['total_churned_customers']} churned accounts.", styles["BodyText"]))
+    story.append(Paragraph(f"<b>Retention Dynamics:</b> {safe_xml_escape(churn_summary['interpretation'])} Customer base expanded from {df['NewCustomers'].iloc[0] - df['ChurnedCustomers'].iloc[0]} to {churn_summary['ending_customers']} active subscribers across {churn_summary['total_new_customers']} total additions and {churn_summary['total_churned_customers']} churned accounts.", styles["BodyText"]))
     story.append(Paragraph("<i>Note: Customer base is reconstructed from monthly aggregated customer movement totals.</i>", styles["Disclaimer"]))
     story.append(Spacer(1, 4))
 
@@ -498,7 +509,7 @@ def generate_investor_report(
     story.append(Paragraph("5. Period-over-Period KPI Comparison (Latest vs Previous Month)", styles["SectionHeading"]))
     story.append(_df_to_reportlab_table(mom_table, styles, col_widths=[110, 85, 85, 85, 95, 80]))
     story.append(Spacer(1, 4))
-    story.append(Paragraph(f"<b>Overall Period Health:</b> {trend_summary['overall_status']}. Key movements show consistent revenue addition alongside controlled customer acquisition costs.", styles["BodyText"]))
+    story.append(Paragraph(f"<b>Overall Period Health:</b> {safe_xml_escape(trend_summary['overall_status'])}. Key movements show consistent revenue addition alongside controlled customer acquisition costs.", styles["BodyText"]))
     story.append(Spacer(1, 8))
 
     # ── 6. HISTORICAL CASH FLOW ANALYSIS ─────────────────────────────────────
@@ -508,7 +519,7 @@ def generate_investor_report(
     story.append(Paragraph(
         f"<b>Cash Position Summary:</b> Starting from an initial cash balance of ${cash_flow_sum['starting_cash_balance']:,.0f}, "
         f"cumulative cash inflow reached ${cash_flow_sum['total_historical_cash_inflow']:,.0f} against total operating outflow of ${cash_flow_sum['total_historical_cash_outflow']:,.0f}, "
-        f"yielding cumulative net cash flow of +${cash_flow_sum['cumulative_net_cash_flow']:,.0f} and a closing cash position of ${cash_flow_sum['latest_cash_position']:,.0f}.",
+        f"yielding cumulative net cash flow of +${cash_flow_sum['cumulative_net_cash_flow']:,.0f} and a closing cash position of {safe_xml_escape(cash_flow_sum['latest_cash_position'])}.",
         styles["BodyText"],
     ))
     story.append(Spacer(1, 4))
@@ -562,6 +573,15 @@ def generate_investor_report(
     for d in disclaimers:
         story.append(Paragraph(d, styles["Disclaimer"]))
 
-    # 3. Build the PDF document
-    doc.build(story, canvasmaker=NumberedCanvas)
+    # 3. Build the PDF document and atomically commit to destination
+    try:
+        doc.build(story, canvasmaker=NumberedCanvas)
+        os.replace(temp_pdf_path, out_file)
+    except Exception:
+        if temp_pdf_path.exists():
+            try:
+                temp_pdf_path.unlink()
+            except OSError:
+                pass
+        raise
     return out_file
