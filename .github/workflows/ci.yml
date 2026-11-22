@@ -15,7 +15,7 @@ jobs:
   # ── Job 1: Unit Test Matrix (Python 3.9 → 3.10 → 3.11 → 3.12) ────────────
   test:
     name: Unit Tests (Python ${{ matrix.python-version }})
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
@@ -50,7 +50,7 @@ jobs:
   # ── Job 2: End-to-End Pipeline Validation (Python 3.12) ───────────────────
   pipeline:
     name: End-to-End Pipeline Validation (Python 3.12)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: test
 
     steps:
