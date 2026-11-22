@@ -2,21 +2,41 @@
 
 [![CI — SaaS Financial Reporter](https://github.com/saxenaanirudha/saas-financial-reporter/actions/workflows/ci.yml/badge.svg)](https://github.com/saxenaanirudha/saas-financial-reporter/actions/workflows/ci.yml)
 
-An AI-assisted SaaS financial reporting and customer analytics project featuring KPI analysis, cash-flow forecasting, automated reporting, an interactive Streamlit dashboard, and ML-based churn risk prediction.
+An AI-assisted SaaS financial reporting and customer analytics system featuring recurring-revenue KPI analysis, cash-flow forecasting, automated PDF reporting, an interactive Streamlit dashboard, and machine-learning-based churn risk prediction.
 
-> **Note on Datasets**: All financial and customer records used in this project are synthetic and illustrative, designed to simulate realistic SaaS business dynamics without using proprietary data.
+> **Note on Datasets & Scope**: All financial and customer records used in this project are synthetic and illustrative, designed to simulate realistic subscription business dynamics without using proprietary data. This application is an internal management analytics and portfolio demonstration—not audited GAAP accounting software, a calibrated production churn system, or a multi-tenant SaaS service.
 
 ---
 
 ## ⚡ Quick Start
 
-```powershell
-# 1. Run the automated analytics pipeline (computes KPIs, forecasts, PDF report, ML model)
+Compatible with **Python 3.9, 3.10, 3.11, and 3.12** (tested across GitHub Actions CI). For production deployments, using a currently supported Python version is recommended.
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/saxenaanirudha/saas-financial-reporter.git
+cd saas-financial-reporter
+
+# 2. Create and activate a virtual environment
+# Windows PowerShell:
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+
+# macOS / Linux:
+python3 -m venv .venv
+source .venv/bin/activate
+
+# 3. Install dependencies
+python -m pip install -r requirements.txt
+
+# 4. Run the automated reporting pipeline (computes KPIs, forecasts, PDF, and ML model)
 python main.py
 
-# 2. Launch the interactive browser dashboard
+# 5. Launch the interactive browser presentation dashboard
 streamlit run app.py
 ```
+
+The pipeline initializes directories automatically and produces 17 runtime files across `charts/`, `reports/`, and `models/`. The Streamlit dashboard typically opens at `http://localhost:8501`.
 
 ---
 
@@ -24,12 +44,13 @@ streamlit run app.py
 
 The project includes an interactive Streamlit web dashboard providing a non-technical presentation layer for executives, investors, and team members to explore financial performance, cash trajectories, and customer risk scoring.
 
+### Executive Overview & Financial Health
 ![SaaS Financial Reporter Executive Dashboard](docs/images/saas-executive-overview.png)
 
-### Cash Flow & Forecast
+### Cash Flow & Forward Forecast
 ![Cash Flow Forecast Dashboard](docs/images/saas-cashflow.png)
 
-### Customer Churn Intelligence
+### Customer Churn Intelligence & ML Scoring
 ![Customer Churn Intelligence Dashboard](docs/images/saas-customer-churn-intelligence.png)
 
 ---
@@ -38,16 +59,17 @@ The project includes an interactive Streamlit web dashboard providing a non-tech
 
 - **MRR and ARR Analytics**: Computes Monthly Recurring Revenue (MRR) and Annualized Recurring Revenue (ARR) run-rates.
 - **MRR Growth Analysis**: Measures Month-over-Month (MoM) revenue growth rates and net revenue expansions.
-- **Customer Acquisition Cost (CAC)**: Tracks marketing spend efficiency per newly acquired customer.
+- **Customer Acquisition Cost (CAC)**: Tracks marketing spend efficiency per newly acquired subscriber.
 - **Customer Churn & Retention Analysis**: Reconstructs customer counts chronologically to evaluate monthly subscriber churn and retention rates.
-- **Historical Operating Cash-Flow Analysis**: Tracks monthly cash inflows against categorized operating expenses and rolls forward cash balances *(cash flow tracking, not GAAP accounting profit)*.
+- **Historical Operating Cash-Flow Analysis**: Tracks monthly cash inflows against categorized operating expenses and rolls forward cash balances *(cash-flow tracking, not GAAP accounting profit)*.
 - **6-Month Trend-Based Cash-Flow Forecasting**: Projects 6-month forward cash trajectories using component-by-component OLS linear regression *(trend-based projection, not guaranteed financial predictions)*.
 - **Automated Management/Investor PDF Reporting**: Generates a multi-page, publication-grade executive PDF report with dynamic KPI tables and 10 embedded high-resolution charts via ReportLab.
-- **Streamlit Browser Dashboard**: Interactive presentation interface (`streamlit run app.py`) for non-technical stakeholders to explore financial KPIs, cash-flow forecasts, churn intelligence, reports, and project information.
+- **Streamlit Browser Dashboard**: Interactive presentation interface (`streamlit run app.py`) for non-technical stakeholders to explore financial KPIs, cash-flow forecasts, churn intelligence, reports, and project architecture.
 - **Customer-Level Churn Prediction using Logistic Regression**: End-to-end Scikit-Learn classification pipeline trained on separate customer behavioral data *(illustrative synthetic dataset; not claimed as production performance)*.
-- **Low / Medium / High Churn-Risk Classification**: Categorizes customer churn probabilities into actionable risk tiers for targeted retention intervention.
-- **Automated Test Suite**: 203 automated unit, integration, concurrency, and security regression tests verifying formulas, data integrity, thread safety, and error handling.
-- **Modular Pipeline Architecture**: Clean, decoupled architecture with automated directory initialization and artifact validation.
+- **Actionable Churn-Risk Tiers**: Categorizes predicted customer churn probabilities into Low ($<0.30$), Medium ($0.30–0.60$), and High ($\ge 0.60$) risk segments for proactive retention outreach.
+- **Automated Test Suite (203 Tests)**: 203 automated unit, integration, concurrency, and security regression tests passing cleanly across 16 test modules with 0 failures.
+- **Barn Door Protocol Hardening**: Comprehensive security audit addressing spreadsheet formula injection, HMAC-SHA256 model provenance, thread-safe Matplotlib rendering, and atomic file persistence. Full audit trail documented in [`BARN_DOOR_QA_REPORT.md`](BARN_DOOR_QA_REPORT.md).
+- **Multi-Version CI/CD Pipeline**: GitHub Actions matrix validating Python 3.9, 3.10, 3.11, and 3.12 on Ubuntu runners alongside end-to-end pipeline execution.
 
 ---
 
@@ -141,10 +163,11 @@ This project demonstrates how a modular Python data pipeline can automate data v
 - **Actionable Risk Tiers**: Categorizes predicted probabilities into **Low** ($<0.30$), **Medium** ($0.30–0.60$), and **High** ($\ge 0.60$) risk segments.
 - **Feature Importance**: Extracts learned coefficients and odds ratios to identify top churn risk drivers.
 
-### 8. Reliability & Execution Orchestration
+### 8. Reliability, Security & Orchestration
 - **Pipeline Coordinator (`src/pipeline.py`)**: Drives end-to-end execution with decoupled stages.
 - **Severity-Aware Error Handling**: Critical errors halt execution safely; non-critical failures log warnings and produce `PARTIAL_SUCCESS`.
 - **Automatic Directory & Artifact Validation**: Auto-creates `charts/`, `reports/`, `models/` and verifies on-disk output integrity.
+- **Barn Door Protocol Hardening**: Enterprise security controls protecting against CSV injection, pickle deserialization vulnerabilities, thread-safety figure corruption, and non-atomic writes.
 
 ---
 
@@ -219,7 +242,7 @@ saas-financial-reporter/
 │
 ├── .github/
 │   └── workflows/
-│       └── ci.yml                     # Multi-version GitHub Actions CI/CD workflow
+│       └── ci.yml                     # Multi-version GitHub Actions CI/CD workflow (Python 3.9–3.12)
 │
 ├── data/
 │   ├── saas_financial_data.csv        # Aggregated monthly financial data (6 months)
@@ -237,6 +260,7 @@ saas-financial-reporter/
 │   ├── config.py                      # Centralized path definitions and constants
 │   ├── exceptions.py                  # Domain exception classes
 │   ├── pipeline.py                    # Pipeline coordinator and orchestration engine
+│   ├── security.py                    # Barn Door Protocol security, sanitization & integrity engine
 │   ├── data_loader.py                 # Financial data loading and validation
 │   ├── revenue_dashboard.py           # MRR, ARR, and revenue growth calculations
 │   ├── cac_calculator.py              # Customer Acquisition Cost calculations
@@ -249,55 +273,60 @@ saas-financial-reporter/
 │   ├── reporting_dashboard.py         # Consolidated console reporting dashboard
 │   └── churn_model.py                 # Logistic regression churn ML model & risk scoring
 │
-├── models/                            # Model output artifacts
+├── models/                            # Model output artifacts (runtime generated; ignored by Git)
 │   ├── .gitkeep                       # Folder tracking
-│   ├── churn_model.joblib             # Serialized trained scikit-learn pipeline (generated at runtime; not committed)
-│   └── churn_model_metrics.json       # Serialized test evaluation metrics (generated at runtime; not committed)
+│   ├── churn_model.joblib             # Serialized trained scikit-learn pipeline
+│   ├── churn_model_provenance.json    # Cryptographic HMAC-SHA256 provenance manifest
+│   └── churn_model_metrics.json       # Serialized test evaluation metrics
 │
-├── charts/                            # Visual chart outputs
+├── charts/                            # Visual chart outputs (runtime generated; ignored by Git)
 │   ├── .gitkeep                       # Folder tracking
-│   ├── mrr_trend.png                  # MRR monthly trajectory (generated at runtime; not committed)
-│   ├── arr_trend.png                  # ARR annualized trajectory (generated at runtime; not committed)
-│   ├── cac_trend.png                  # Customer Acquisition Cost trajectory (generated at runtime; not committed)
-│   ├── churn_retention_trend.png      # Churn & retention rate comparison (generated at runtime; not committed)
-│   ├── customer_base_growth.png       # Active subscriber base growth (generated at runtime; not committed)
-│   ├── mrr_growth_rate.png            # MoM MRR growth rate percentage (generated at runtime; not committed)
-│   ├── net_cash_flow_trend.png        # Monthly net cash flow bars (generated at runtime; not committed)
-│   ├── cash_balance_trend.png         # Closing cash balance trajectory (generated at runtime; not committed)
-│   ├── cash_flow_forecast.png         # Historical vs 6-month net cash flow forecast (generated at runtime; not committed)
-│   ├── cash_balance_forecast.png      # Historical vs 6-month cash balance forecast (generated at runtime; not committed)
-│   ├── churn_confusion_matrix.png     # Churn ML confusion matrix heatmap (generated at runtime; not committed)
-│   └── churn_roc_curve.png            # Churn ML ROC-AUC curve (generated at runtime; not committed)
+│   ├── mrr_trend.png                  # MRR monthly trajectory
+│   ├── arr_trend.png                  # ARR annualized trajectory
+│   ├── cac_trend.png                  # Customer Acquisition Cost trajectory
+│   ├── churn_retention_trend.png      # Churn & retention rate comparison
+│   ├── customer_base_growth.png       # Active subscriber base growth
+│   ├── mrr_growth_rate.png            # MoM MRR growth rate percentage
+│   ├── net_cash_flow_trend.png        # Monthly net cash flow bars
+│   ├── cash_balance_trend.png         # Closing cash balance trajectory
+│   ├── cash_flow_forecast.png         # Historical vs 6-month net cash flow forecast
+│   ├── cash_balance_forecast.png      # Historical vs 6-month cash balance forecast
+│   ├── churn_confusion_matrix.png     # Churn ML confusion matrix heatmap
+│   └── churn_roc_curve.png            # Churn ML ROC-AUC curve
 │
-├── reports/                           # Executive reports
+├── reports/                           # Executive reports (runtime generated; ignored by Git)
 │   ├── .gitkeep                       # Folder tracking
-│   ├── saas_financial_report.pdf      # Master management/investor PDF report (generated at runtime; not committed)
-│   └── customer_churn_risk.csv        # Scored customer accounts with risk tiers (generated at runtime; not committed)
+│   ├── saas_financial_report.pdf      # Master management/investor PDF report
+│   └── customer_churn_risk.csv        # Sanitized customer accounts scored with risk tiers
 │
-├── tests/                             # Unit & Integration test suite (180 passing tests)
+├── tests/                             # Unit, integration & security test suite (203 passing tests)
 │   ├── __init__.py
-│   ├── test_data_loader.py
-│   ├── test_revenue_dashboard.py
-│   ├── test_cac_calculator.py
-│   ├── test_churn_retention_analyzer.py
-│   ├── test_chart_generator.py
-│   ├── test_kpi_comparator.py
-│   ├── test_cash_flow_analyzer.py
-│   ├── test_cash_flow_forecaster.py
-│   ├── test_pdf_report_generator.py
-│   ├── test_reporting_dashboard.py
-│   ├── test_churn_model.py
-│   ├── test_pipeline.py
-│   └── test_end_to_end_regression.py  # End-to-end mathematical regression tests
+│   ├── test_app.py                    # Streamlit dashboard helper tests
+│   ├── test_cac_calculator.py         # CAC calculation unit tests
+│   ├── test_cash_flow_analyzer.py     # Cash flow ledger unit tests
+│   ├── test_cash_flow_forecaster.py   # OLS linear forecasting tests
+│   ├── test_chart_generator.py        # Chart generation tests
+│   ├── test_churn_model.py            # Churn classification model tests
+│   ├── test_churn_retention_analyzer.py # Subscriber roll-forward & churn tests
+│   ├── test_concurrency.py            # Matplotlib thread safety & atomic write concurrency tests
+│   ├── test_data_loader.py            # Schema validation and dataset ingestion tests
+│   ├── test_end_to_end_regression.py  # End-to-end mathematical regression tests
+│   ├── test_kpi_comparator.py         # Period-over-period comparison tests
+│   ├── test_pdf_report_generator.py   # ReportLab PDF compilation tests
+│   ├── test_pipeline.py               # Pipeline orchestration and error handling tests
+│   ├── test_reporting_dashboard.py    # Console dashboard tests
+│   ├── test_revenue_dashboard.py      # MRR, ARR, and growth rate tests
+│   └── test_security.py               # OWASP & Barn Door Protocol security regression tests
 │
 ├── app.py                             # Interactive Streamlit browser dashboard
 ├── main.py                            # Automated pipeline CLI entry point
-├── requirements.txt                   # Minimal project dependencies
+├── requirements.txt                   # Project dependencies with PEP 508 Python version markers
 ├── .gitignore                         # Git ignore configuration (excludes runtime artifacts)
+├── BARN_DOOR_QA_REPORT.md             # Formal Barn Door Protocol security & QA audit report
 ├── PROJECT_SUMMARY.md                 # Project architecture & quick reference
 ├── GITHUB_DESCRIPTION.txt             # Repository description & topic tags
 ├── RESUME_PROJECT_ENTRY.md            # Resume & portfolio snippets
-├── INTERVIEW_QA.md                    # 20 common technical & domain interview Q&As
+├── INTERVIEW_QA.md                    # 20 technical & domain interview Q&As
 └── README.md                          # Comprehensive technical documentation
 ```
 
@@ -354,12 +383,15 @@ The Machine Learning classification model reads from `data/customer_churn_data.c
 $$\text{MRR} = \text{Monthly Subscription Revenue Recognized}$$
 $$\text{ARR} = \text{MRR} \times 12$$
 
+*Note: ARR represents an annualized run-rate based on current monthly pace, not a guaranteed projection of realized 12-month future revenue.*
+
 ### 2. Month-over-Month MRR Growth Rate
 $$\text{MoM Growth } (\%) = \frac{\text{MRR}_t - \text{MRR}_{t-1}}{\text{MRR}_{t-1}} \times 100$$
-*(First month growth is explicitly undefined / `NaN` due to lack of a preceding baseline).*
+*(First month growth is explicitly undefined / `NaN` due to lack of a preceding baseline; zero-denominator scenarios are guarded).*
 
 ### 3. Customer Acquisition Cost (CAC)
 $$\text{CAC} = \frac{\text{Marketing Spend}}{\text{New Customers Acquired}}$$
+*(Returns `NaN` when new customers acquired equals 0 to prevent division-by-zero errors).*
 
 ### 4. Reconstructed Customer Base Roll-Forward
 Because monthly aggregated data lacks explicit beginning balance records, the subscriber base is reconstructed chronologically:
@@ -367,10 +399,12 @@ Because monthly aggregated data lacks explicit beginning balance records, the su
 - **Ending Customers**: $\text{Beginning Customers} + \text{New Customers} - \text{Churned Customers}$
 - **Month $N$ Beginning Customers**: $\text{Ending Customers}_{N-1}$
 
+*Note: Customer Lifetime Value (LTV) and an explicit initial opening customer base parameter were deferred in the baseline protocol; the reconstructed base is an illustrative roll-forward.*
+
 ### 5. Customer Churn Rate & Retention Rate
 $$\text{Churn Rate } (\%) = \frac{\text{Churned Customers}_t}{\text{Beginning Customers}_t} \times 100$$
 $$\text{Retention Rate } (\%) = 100 - \text{Churn Rate } (\%)$$
-*(First month churn/retention is recorded as `NaN` because Month 1 beginning customer base is 0).*
+*(First month churn/retention is recorded as `NaN` because Month 1 beginning customer base is initialized to 0).*
 
 ---
 
@@ -388,7 +422,7 @@ The cash flow module models operational liquidity under a transparent simplified
    - $\text{Closing Balance}_t = \text{Opening Balance}_t + \text{Net Cash Flow}_t$
    - $\text{Opening Balance}_{t+1} = \text{Closing Balance}_t$
 
-> **Important Distinction**: Operating cash flow represents liquidity movement through the business and is distinct from GAAP accounting profit (which would require accounting for accruals, depreciation, and amortization).
+> **Important Distinction**: Operating cash flow represents liquidity movement through the business and is distinct from GAAP accounting profit (which requires accounting for revenue deferrals, receivables aging, depreciation, and amortization).
 
 ---
 
@@ -410,7 +444,7 @@ To estimate future cash burn and runway without opaque assumptions, the forecast
 4. **Projected Balance Roll-Forward**:
    The first forecast month opens with the latest historical closing cash balance and rolls forward across the 6 projected months.
 
-> **Forecasting Nature**: These projections represent linear trend extrapolations based on historical trajectory for planning scenarios, not guaranteed future financial outcomes.
+> **Forecasting Nature**: Given the 6-month historical series, these projections represent linear trend extrapolations for scenario planning, not statistical prediction intervals or guaranteed future financial outcomes.
 
 ---
 
@@ -422,14 +456,21 @@ To estimate future cash burn and runway without opaque assumptions, the forecast
    - **Numerical Features** (`StandardScaler`): `MonthlyFee`, `TenureMonths`, `LastLoginDaysAgo`, `SupportTickets`, `MonthlyUsageHours`, `PaymentFailures`, `DiscountPercent`, `AutoRenew`.
    - **Categorical Features** (`OneHotEncoder(drop='first', handle_unknown='ignore')`): `Plan`, `ContractType`.
 3. **Classifier**: `LogisticRegression(max_iter=1000, random_state=42)`.
-4. **Evaluation**: Held-out test set metrics computed with `zero_division=0`:
+4. **Evaluation**: Held-out test set metrics computed with `zero_division=0` and exported to `models/churn_model_metrics.json`:
    - Accuracy, Precision, Recall, F1-Score, ROC-AUC Score, and Confusion Matrix ($TN, FP, FN, TP$).
+
+> **Model Performance Note**: Inspect `models/churn_model_metrics.json` directly for the exact evaluation metrics of your run. Metrics on synthetic illustrative data demonstrate pipeline execution and do not represent production performance on live customer telemetry.
 
 ### Operational Risk Tiers
 Predicted probabilities $P(\text{Churn} = 1)$ are mapped to portfolio action tiers:
-- **Low Risk ($P < 0.30$)**: Account healthy; standard lifecycle communications.
-- **Medium Risk ($0.30 \le P < 0.60$)**: Moderate engagement decline; automated check-ins.
-- **High Risk ($P \ge 0.60$)**: Elevated churn probability; prioritized for Customer Success outreach.
+
+| Tier | Predicted Probability | Operational Guidance |
+| :--- | :--- | :--- |
+| **Low Risk** | $P < 0.30$ | Account healthy; standard lifecycle engagement |
+| **Medium Risk** | $0.30 \le P < 0.60$ | Moderate engagement decline; automated check-ins |
+| **High Risk** | $P \ge 0.60$ | Elevated churn probability; prioritized for Customer Success outreach |
+
+*Note: These tiers represent illustrative operational heuristics rather than cost-calibrated retention policies.*
 
 ### Data Leakage Protections
 - Preprocessing transformations are fit strictly on `X_train` inside the scikit-learn `Pipeline`.
@@ -439,16 +480,29 @@ Predicted probabilities $P(\text{Churn} = 1)$ are mapped to portfolio action tie
 
 ## 📁 Generated Outputs & Artifacts
 
-When the pipeline executes, the following verified artifacts are produced (runtime artifacts are ignored by Git via `.gitignore`):
+When `python main.py` executes, it produces **17 files on disk** across three output directories. The pipeline coordinator validates **16 primary business reporting artifacts** during Step 14, while the model serialization engine atomically writes the accompanying **cryptographic provenance manifest** (`churn_model_provenance.json`):
 
-| Output Artifact | Location | Commit Status | Description |
-| :--- | :--- | :--- | :--- |
-| **PDF Investor Report** | `reports/saas_financial_report.pdf` | *(generated at runtime; not committed)* | Comprehensive multi-page management & investor summary |
-| **Customer Risk Scoring CSV** | `reports/customer_churn_risk.csv` | *(generated at runtime; not committed)* | All 500 accounts scored and ranked by churn probability |
-| **Serialized Churn Model** | `models/churn_model.joblib` | *(generated at runtime; not committed)* | Trained scikit-learn pipeline binary |
-| **Model Evaluation Metrics** | `models/churn_model_metrics.json` | *(generated at runtime; not committed)* | Test set metrics in structured JSON format |
-| **Financial KPI Charts (10)** | `charts/*.png` | *(generated at runtime; not committed)* | High-resolution trend plots (MRR, ARR, CAC, Cash Flow, Forecast) |
-| **ML Evaluation Charts (2)** | `charts/churn_*.png` | *(generated at runtime; not committed)* | Confusion Matrix heatmap & ROC-AUC curve |
+| # | Artifact | File Path | Category | Role & Description |
+| :-: | :--- | :--- | :--- | :--- |
+| 1 | **PDF Investor Report** | `reports/saas_financial_report.pdf` | Reporting | Multi-page executive summary with KPI tables and 10 embedded charts |
+| 2 | **Customer Risk Report** | `reports/customer_churn_risk.csv` | Analytics | 500 accounts scored with churn probability and risk tier (formula-sanitized) |
+| 3 | **MRR Trend Chart** | `charts/mrr_trend.png` | Financial Chart | Monthly recurring revenue historical progression plot |
+| 4 | **ARR Trend Chart** | `charts/arr_trend.png` | Financial Chart | Annualized recurring revenue run-rate progression plot |
+| 5 | **CAC Trend Chart** | `charts/cac_trend.png` | Financial Chart | Customer acquisition cost trajectory and spend efficiency plot |
+| 6 | **Churn & Retention Chart** | `charts/churn_retention_trend.png` | Financial Chart | Monthly customer churn % vs. retention % comparison plot |
+| 7 | **Customer Base Growth Chart**| `charts/customer_base_growth.png` | Financial Chart | Reconstructed active subscriber base growth plot |
+| 8 | **MRR Growth Rate Chart** | `charts/mrr_growth_rate.png` | Financial Chart | Month-over-month percentage revenue expansion plot |
+| 9 | **Net Cash Flow Chart** | `charts/net_cash_flow_trend.png` | Financial Chart | Historical monthly net operational cash flow bars |
+| 10 | **Cash Balance Chart** | `charts/cash_balance_trend.png` | Financial Chart | Cumulative closing cash balance ledger trajectory plot |
+| 11 | **Cash Flow Forecast Chart** | `charts/cash_flow_forecast.png` | Financial Chart | Historical vs. 6-month projected net cash flow comparison |
+| 12 | **Cash Balance Forecast Chart**| `charts/cash_balance_forecast.png`| Financial Chart | Historical vs. 6-month projected closing cash balance comparison |
+| 13 | **Churn Confusion Matrix** | `charts/churn_confusion_matrix.png`| ML Evaluation | Test set classification performance heatmap ($TN, FP, FN, TP$) |
+| 14 | **Churn ROC Curve** | `charts/churn_roc_curve.png` | ML Evaluation | Receiver Operating Characteristic plot with computed ROC-AUC score |
+| 15 | **Churn Model Binary** | `models/churn_model.joblib` | ML Model | Serialized scikit-learn trained classification pipeline |
+| 16 | **Churn Metrics JSON** | `models/churn_model_metrics.json` | ML Evaluation | Structured evaluation metrics (accuracy, precision, recall, F1, AUC) |
+| 17 | **Model Provenance Manifest** | `models/churn_model_provenance.json`| Security | HMAC-SHA256 signature, SHA-256 hash, and metadata for artifact integrity and authenticity verification |
+
+*Note: All runtime output files are excluded from version control via `.gitignore`. Running `python main.py` regenerates all 17 artifacts cleanly.*
 
 ---
 
@@ -479,15 +533,17 @@ source .venv/bin/activate
 
 ### 4. Install Dependencies
 ```powershell
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
+
+> **Note on ReportLab & Python 3.9**: Upstream `reportlab 5.1.0+` dropped support for Python 3.9. The repository's `requirements.txt` includes PEP 508 environment markers (`reportlab>=4.0.0,<5.1.0; python_version < "3.10"`) ensuring full compatibility across Python 3.9 through 3.12 without manual intervention.
 
 ---
 
 ## 🏃 Running the Project
 
 ### 1. Run the Automated Analytics & ML Pipeline
-To execute the complete end-to-end reporting pipeline and ML workflow:
+To execute the complete end-to-end reporting pipeline:
 
 ```powershell
 python main.py
@@ -498,11 +554,11 @@ python main.py
 2. Monthly financial data (`data/saas_financial_data.csv`) is validated and loaded.
 3. Revenue, CAC, and Churn/Retention analytics are computed.
 4. Historical cash flow and 6-month statistical forecasts are generated.
-5. High-resolution PNG charts and master PDF report (`reports/saas_financial_report.pdf`) are rendered.
+5. High-resolution PNG charts and master PDF report (`reports/saas_financial_report.pdf`) are rendered atomically.
 6. Consolidated console dashboard displays core business health.
-7. Customer churn dataset (`data/customer_churn_data.csv`) is processed and trained via Logistic Regression.
-8. Customer risk report (`reports/customer_churn_risk.csv`) and model binaries are persisted.
-9. Final artifact validation verifies all 16 generated files on disk.
+7. Customer churn dataset (`data/customer_churn_data.csv`) is split and trained via Logistic Regression.
+8. Customer risk report (`reports/customer_churn_risk.csv`), model binary, and signed HMAC provenance manifest are persisted.
+9. Final artifact validation verifies all 16 business artifacts on disk.
 
 ### 2. Launch the Interactive Presentation Dashboard
 To launch the client-ready Streamlit web application:
@@ -517,7 +573,7 @@ The dashboard will open automatically in your default browser (typically at `htt
 
 ## 🧪 Running Tests
 
-The test suite contains **203 automated unit, integration, and security regression tests** verifying formulas, data validation, chart rendering, PDF generation, ML leakage prevention, CSV formula injection defense, model HMAC provenance signing, thread synchronization, and full pipeline reliability:
+The test suite contains **203 automated unit, integration, concurrency, and security regression tests** passing cleanly across 16 test modules with 0 failures:
 
 ```powershell
 # Verbose test execution (runs all 203 tests across 16 test modules)
@@ -526,6 +582,14 @@ pytest -v
 # Quiet summary check
 pytest -q
 ```
+
+### Continuous Integration (GitHub Actions)
+The repository uses a multi-version CI workflow (`.github/workflows/ci.yml`) validating all changes against:
+- **Unit Tests (Python 3.9)**: Pinned `ubuntu-22.04` runner with ReportLab compatibility constraint.
+- **Unit Tests (Python 3.10)**: Pinned `ubuntu-22.04` runner.
+- **Unit Tests (Python 3.11)**: Pinned `ubuntu-22.04` runner.
+- **Unit Tests (Python 3.12)**: Pinned `ubuntu-22.04` runner.
+- **End-to-End Pipeline Validation (Python 3.12)**: Full pipeline execution producing all 16 business artifacts and uploading chart and PDF bundles.
 
 ---
 
@@ -538,7 +602,7 @@ The project has undergone rigorous application security auditing and engineering
 - **Spreadsheet Formula Injection Prevention (CWE-1236 / SEC-01 & BLK-02):**
   Defensively sanitizes string exports in `sanitize_dataframe_for_csv()`. Cells starting with formula triggers (`=`, `+`, `-`, `@`, `\t`, `\r`) — including values preceded by whitespace, spaces, tabs, or newlines (`" =cmd|..."`, `"\t+1234"`, `"\n-cmd"`) — are safely prefixed with a single quote (`'`). Already quoted cells (`'`) are preserved without double-escaping, and native numeric columns (`float`, `int`, e.g., negative cash flows `-1500.50`) remain untransformed.
 - **HMAC-SHA256 Model Provenance Verification (CWE-502 / SEC-02 & BLK-01):**
-  Serialized scikit-learn model artifacts (`churn_model.joblib`) are paired with a cryptographically signed HMAC-SHA256 provenance manifest (`churn_model_provenance.json`). Deserialization verifies file size bounds (50 MB safety cap), path containment (preventing directory traversal attacks), SHA-256 binary hash, and HMAC signature prior to unpickling.
+  Serialized scikit-learn model artifacts (`churn_model.joblib`) are paired with a cryptographically signed HMAC-SHA256 provenance manifest (`churn_model_provenance.json`). Deserialization verifies file size bounds (50 MB safety cap), path containment (preventing directory traversal attacks), SHA-256 binary hash, and HMAC signature prior to unpickling. This cryptographic verification provides essential artifact integrity and authenticity checks to prevent unauthorized replacement or tampering; however, it does not make pickle/joblib deserialization inherently safe against arbitrary execution if an untrusted artifact is signed. Only model artifacts from trusted sources should ever be loaded.
 - **Production Key Management & Rotation (BLK-01):**
   Hardcoded fallback signing keys are strictly rejected. In production/strict mode (`require_secret=True`, `SAAS_STRICT_SECURITY=1`, or `SAAS_ENV=production`), a missing `SAAS_MODEL_SECRET` raises `SecurityValidationError` without exposing key bytes in logs. In local development and CI workflows, an ephemeral process-isolated random secret (`os.urandom(32)`) is generated in memory, preventing signature forgery against static keys while enabling test suites to run unhindered.
 - **Thread-Safe Matplotlib Rendering (CONC-01 / BLK-03):**
@@ -572,9 +636,10 @@ $env:SAAS_STRICT_SECURITY="1"
 
 | Dimension | Verified Protections | Documented Limitations |
 | :--- | :--- | :--- |
-| **Concurrency Scope** | Multi-threaded safety within a single process via `MATPLOTLIB_LOCK` and `ARTIFACT_PUBLISH_LOCK`. | Multi-process model/manifest publication uses dual `os.replace` calls. While individual file swaps are OS-atomic, mutual transactionality across separate operating system processes requires an external distributed lock. |
-| **Application Scope** | Secure internal management reporting and analytical dashboarding. | Single-tenant architecture; not designed for untrusted multi-tenant database partitioning. |
-| **Data Scope** | Tested against malicious formula injection, XML payloads, and oversized datasets. | Simplified cash-flow ledger treats MRR as immediate cash inflow without modeling accounts receivable delays. |
+| **Concurrency Scope** | Multi-threaded safety within a single process via `MATPLOTLIB_LOCK` and `ARTIFACT_PUBLISH_LOCK`. | Multi-process model/manifest publication uses individual atomic `os.replace` calls. While individual file replacements are OS-atomic, mutual transactionality across separate operating system processes requires an external distributed lock. |
+| **Application Scope** | Secure internal management reporting and analytical dashboarding. | Single-tenant architecture. Streamlit's process-global caching is designed for single-tenant internal use and must be partitioned before handling multi-tenant private data. |
+| **Data Scope** | Tested against malicious formula injection, XML payloads, and oversized datasets. | CSV formula escaping applies `'` prefixing; consumer behavior can vary across spreadsheet software versions and import settings. Cash flow treats MRR as immediate inflow without accounts receivable aging. |
+| **Model Deserialization** | HMAC-SHA256 signature and SHA-256 hash verified before `joblib.load()`. | Cryptographic provenance provides artifact integrity and authenticity verification against unauthorized replacement or tampering, but does not make pickle/joblib deserialization inherently safe. Only trusted model artifacts should be loaded. |
 
 ---
 
@@ -601,7 +666,7 @@ $env:SAAS_STRICT_SECURITY="1"
 
 ## 🤖 AI-Assisted Development Approach
 
-This project was developed using an **AI-assisted software engineering workflow**. AI tools (such as Claude, ChatGPT, and Antigravity) supported implementation, boilerplate generation, and debugging, while project direction was focused on core business requirements, financial logic formulation, statistical methodology, rigorous test coverage, and end-to-end workflow integration.
+This project was developed using an **AI-assisted software engineering workflow**. AI tools supported implementation, boilerplate generation, and debugging, while project direction was focused on core business requirements, financial logic formulation, statistical methodology, rigorous test coverage, and end-to-end workflow integration.
 
 The primary objective of this project was to construct a transparent, production-style analytics and reporting lifecycle—from raw data validation and financial mathematics to machine learning integration, test-driven quality assurance, and interactive presentation—ensuring every formula, edge case, and architectural decision is transparent, interview-defensible, and thoroughly validated.
 
@@ -618,6 +683,7 @@ The primary objective of this project was to construct a transparent, production
 - **Robust Software Engineering**: Decoupled architecture, domain exceptions, input DataFrame immutability, automated directory preparation, and artifact validation.
 - **Test-Driven Quality Assurance**: 203 comprehensive unit, integration, and security regression tests using `pytest`.
 - **CI/CD Automation**: GitHub Actions multi-version Python test matrix (Python 3.9–3.12) and artifact upload workflows.
+- **Application Security & Hardening**: Defense-in-depth against CSV formula injection (CWE-1236), unsafe deserialization (CWE-502), XML entity injection (CWE-116), path exposure (CWE-209), and resource exhaustion (CWE-400).
 
 ---
 
@@ -627,6 +693,7 @@ The primary objective of this project was to construct a transparent, production
 - **Cohort Retention Heatmaps**: Build triangle cohort retention matrices tracking subscriber longevity over time.
 - **Threshold Calibration**: Implement cost-sensitive threshold optimization based on Customer Lifetime Value (LTV) vs. retention outreach cost.
 - **Database Integration**: Connect ingestion pipelines to PostgreSQL or cloud data warehouses (BigQuery/Snowflake).
+- **Cross-Process Publication Locking**: Integrate distributed advisory locking for multi-process environments requiring cross-file transactional publication.
 
 ---
 
